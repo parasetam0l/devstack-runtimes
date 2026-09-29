@@ -93,7 +93,7 @@ case "$runtime_id" in
         }
         export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
-        export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -Wl,-rpath,@loader_path/../lib"
+        export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -lresolv -Wl,-rpath,@loader_path/../lib"
         configure_make_install \
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
