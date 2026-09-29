@@ -9,7 +9,7 @@ Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sou
 ## Required build host
 
 - Apple Silicon running macOS 27 with full Xcode selected by `xcode-select`.
-- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. Put `.build/build-tools/bin` first on `PATH` before running the other scripts.
+- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf, Bison) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. Put `.build/build-tools/bin` first on `PATH` before running the other scripts.
 - An Apple Developer ID Application identity and notarization keychain profile for a distributable image.
 
 No Homebrew or MacPorts prefix is accepted by the audit, even on the release machine.
