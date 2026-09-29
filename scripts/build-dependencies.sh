@@ -122,10 +122,13 @@ for filename, (name, version, libs, cflags) in items.items():
         encoding="utf-8",
     )
 PY
-    # PHP's bzip2 check only probes explicit -I directories, never CPPFLAGS,
-    # so the SDK header is staged in the dependency prefix for --with-bz2.
+    # PHP's bzip2 and iconv checks only probe explicit -I directories, never
+    # CPPFLAGS, so the SDK headers are staged in the dependency prefix.
     if [[ -f "$sdk/usr/include/bzlib.h" ]]; then
         cp "$sdk/usr/include/bzlib.h" "$prefix/include/bzlib.h"
+    fi
+    if [[ -f "$sdk/usr/include/iconv.h" ]]; then
+        cp "$sdk/usr/include/iconv.h" "$prefix/include/iconv.h"
     fi
 }
 
