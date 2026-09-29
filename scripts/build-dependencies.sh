@@ -128,6 +128,7 @@ build_target() {
             apr) build_autotools "$source" "$prefix" ;;
             apr-util) build_autotools "$source" "$prefix" --with-apr="$prefix/bin/apr-1-config" --without-berkeley-db ;;
             pcre2) build_autotools "$source" "$prefix" --enable-pcre2-8 --enable-jit ;;
+            nghttp2) build_cmake "$source" "$prefix" -DENABLE_LIB_ONLY=ON -DENABLE_DOC=OFF -DENABLE_TESTING=OFF ;;
             zlib) build_zlib "$source" "$prefix" ;;
             libpng) build_autotools "$source" "$prefix" --with-zlib-prefix="$prefix" ;;
             icu)
