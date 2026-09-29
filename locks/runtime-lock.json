@@ -1,5 +1,389 @@
 {
   "schemaVersion": 1,
-  "runtimes": []
+  "runtimes": [
+    {
+      "id": "openssl-3.5",
+      "kind": "openssl",
+      "version": "3.5.8",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "openssl": "bin/openssl" },
+      "extensions": [],
+      "hashes": {},
+      "license": "Apache-2.0",
+      "source": {
+        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.8/openssl-3.5.8.tar.gz",
+        "sha256": "a8f84a39918ec6415ce765d9b429d313ba97b8143169c172e734b9514464f5b2",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib"],
+      "build": {
+        "buildSystem": "Configure/make",
+        "flags": ["darwin64-arm64-cc", "shared", "no-tests", "--libdir=lib"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0" },
+        "dependencies": [],
+        "patchSources": [],
+        "feasibilityGate": "OpenSSL full test suite passes before dependent runtimes are built"
+      }
+    },
+    {
+      "id": "apache-2.4",
+      "kind": "apache",
+      "version": "2.4.68",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "httpd": "bin/httpd", "apachectl": "bin/apachectl" },
+      "extensions": [],
+      "hashes": {},
+      "license": "Apache-2.0",
+      "source": {
+        "url": "https://downloads.apache.org/httpd/httpd-2.4.68.tar.bz2",
+        "sha256": "68c74d4df38c26bed4dfbdb8f3baf1eb532f3872357becc1bba5d136f6b63c06",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib"],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": ["--enable-so", "--enable-ssl", "--enable-http2", "--enable-proxy", "--enable-proxy-fcgi", "--enable-proxy-http", "--with-mpm=event"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
+        "dependencies": ["openssl-3.5", "apr", "apr-util", "pcre2"],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "php-7.4",
+      "kind": "php",
+      "version": "7.4.33",
+      "abi": "20190902-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "php": "bin/php", "php-fpm": "sbin/php-fpm", "phpize": "bin/phpize", "php-config": "bin/php-config" },
+      "extensions": [
+        { "name": "bcmath", "enabledByDefault": true, "zendExtension": false },
+        { "name": "bz2", "enabledByDefault": true, "zendExtension": false },
+        { "name": "calendar", "enabledByDefault": true, "zendExtension": false },
+        { "name": "curl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "dom", "enabledByDefault": true, "zendExtension": false },
+        { "name": "exif", "enabledByDefault": true, "zendExtension": false },
+        { "name": "fileinfo", "enabledByDefault": true, "zendExtension": false },
+        { "name": "ftp", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gd", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gettext", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gmp", "enabledByDefault": true, "zendExtension": false },
+        { "name": "intl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "mbstring", "enabledByDefault": true, "zendExtension": false },
+        { "name": "mysqli", "enabledByDefault": true, "zendExtension": false },
+        { "name": "opcache", "enabledByDefault": true, "zendExtension": true },
+        { "name": "pcntl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "pdo_mysql", "enabledByDefault": true, "zendExtension": false },
+        { "name": "pdo_sqlite", "enabledByDefault": true, "zendExtension": false },
+        { "name": "soap", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sockets", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sodium", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sqlite3", "enabledByDefault": true, "zendExtension": false },
+        { "name": "tidy", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xml", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xsl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "zip", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xdebug", "version": "3.1.6", "enabledByDefault": false, "zendExtension": true },
+        { "name": "redis", "version": "6.3.0", "enabledByDefault": true, "zendExtension": false },
+        { "name": "imagick", "version": "3.8.1", "enabledByDefault": true, "zendExtension": false }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-7.4.33.tar.xz",
+        "sha256": "924846abf93bc613815c55dd3f5809377813ac62a9ec4eb3778675b82a27b927",
+        "patches": ["php-7.4.26-openssl3.patch"]
+      },
+      "supportState": "conditional",
+      "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib", "@rpath/libMagickWand-7.Q16HDRI.10.dylib"],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": ["--disable-cgi", "--enable-fpm", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
+        "dependencies": ["openssl-3.5", "imagemagick-7.1", "zlib", "libpng", "icu", "oniguruma", "libzip", "libsodium", "gmp", "tidy", "gettext", "macOS-libxml2", "macOS-libxslt", "macOS-libcurl", "macOS-sqlite3"],
+        "patchSources": [
+          {
+            "url": "https://git.remirepo.net/cgit/rpms/scl-php74/php.git/plain/php-7.4.26-openssl3.patch?id=eb7ff601c91ee536dd7b7f1b996a497c506e0192",
+            "sha256": "7a6378151ace6313365ed7254962c85711adf281a2b524a64102f2d5512005ba",
+            "revision": "eb7ff601c91ee536dd7b7f1b996a497c506e0192",
+            "patches": []
+          }
+        ],
+        "feasibilityGate": "Native ARM64 NTS CLI/FPM plus applicable PHP and OpenSSL extension suites must pass; otherwise this runtime is omitted"
+      }
+    },
+    {
+      "id": "php-8.5",
+      "kind": "php",
+      "version": "8.5.11",
+      "abi": "20250925-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "php": "bin/php", "php-fpm": "sbin/php-fpm", "phpize": "bin/phpize", "php-config": "bin/php-config" },
+      "extensions": [
+        { "name": "bcmath", "enabledByDefault": true, "zendExtension": false },
+        { "name": "bz2", "enabledByDefault": true, "zendExtension": false },
+        { "name": "calendar", "enabledByDefault": true, "zendExtension": false },
+        { "name": "curl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "dom", "enabledByDefault": true, "zendExtension": false },
+        { "name": "exif", "enabledByDefault": true, "zendExtension": false },
+        { "name": "fileinfo", "enabledByDefault": true, "zendExtension": false },
+        { "name": "ftp", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gd", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gettext", "enabledByDefault": true, "zendExtension": false },
+        { "name": "gmp", "enabledByDefault": true, "zendExtension": false },
+        { "name": "intl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "mbstring", "enabledByDefault": true, "zendExtension": false },
+        { "name": "mysqli", "enabledByDefault": true, "zendExtension": false },
+        { "name": "opcache", "enabledByDefault": true, "zendExtension": true },
+        { "name": "pcntl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "pdo_mysql", "enabledByDefault": true, "zendExtension": false },
+        { "name": "pdo_sqlite", "enabledByDefault": true, "zendExtension": false },
+        { "name": "soap", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sockets", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sodium", "enabledByDefault": true, "zendExtension": false },
+        { "name": "sqlite3", "enabledByDefault": true, "zendExtension": false },
+        { "name": "tidy", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xml", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xsl", "enabledByDefault": true, "zendExtension": false },
+        { "name": "zip", "enabledByDefault": true, "zendExtension": false },
+        { "name": "xdebug", "version": "3.5.3", "enabledByDefault": false, "zendExtension": true },
+        { "name": "redis", "version": "6.3.0", "enabledByDefault": true, "zendExtension": false },
+        { "name": "imagick", "version": "3.8.1", "enabledByDefault": true, "zendExtension": false }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-8.5.11.tar.xz",
+        "sha256": "d9be75c08e8c316f4c8f4194d8fbe1750a15f6a6d9d4e3fe72082abeeb800360",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib", "@rpath/libMagickWand-7.Q16HDRI.10.dylib"],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": ["--disable-cgi", "--enable-fpm", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
+        "dependencies": ["openssl-3.5", "imagemagick-7.1", "zlib", "libpng", "icu", "oniguruma", "libzip", "libsodium", "gmp", "tidy", "gettext", "macOS-libxml2", "macOS-libxslt", "macOS-libcurl", "macOS-sqlite3"],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "mysql-5.7",
+      "kind": "mysql",
+      "version": "5.7.44",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "mysqld": "bin/mysqld", "mysql": "bin/mysql", "mysqldump": "bin/mysqldump", "mysqladmin": "bin/mysqladmin" },
+      "extensions": [],
+      "hashes": {},
+      "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
+      "source": {
+        "url": "https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-boost-5.7.44.tar.gz",
+        "sha256": "b8fe262c4679cb7bbc379a3f1addc723844db168628ce2acf78d33906849e491",
+        "patches": []
+      },
+      "supportState": "end-of-life",
+      "dependencyPaths": [],
+      "build": {
+        "buildSystem": "cmake/make",
+        "flags": ["-DDOWNLOAD_BOOST=OFF", "-DWITH_BOOST=boost", "-DWITH_SSL=$OPENSSL_ROOT", "-DWITH_UNIT_TESTS=ON", "-DWITH_ROUTER=OFF", "-DWITHOUT_SERVER=OFF"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "CMAKE_OSX_ARCHITECTURES": "arm64" },
+        "dependencies": ["openssl-3.5"],
+        "patchSources": [],
+        "feasibilityGate": "Native ARM64 initialization, CRUD, transactions, graceful shutdown, restart, and integrity verification must all pass"
+      }
+    },
+    {
+      "id": "mysql-8.4",
+      "kind": "mysql",
+      "version": "8.4.11",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "mysqld": "bin/mysqld", "mysql": "bin/mysql", "mysqldump": "bin/mysqldump", "mysqladmin": "bin/mysqladmin" },
+      "extensions": [],
+      "hashes": {},
+      "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
+      "source": {
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.11.tar.gz",
+        "sha256": "eb3051164d625dd346a8203f76e0d5d5d9aec51dbe9d51788e39ec6b3f1394c2",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [],
+      "build": {
+        "buildSystem": "cmake/ninja",
+        "flags": ["-DDOWNLOAD_BOOST=OFF", "-DWITH_SSL=$OPENSSL_ROOT", "-DWITH_UNIT_TESTS=ON", "-DWITH_ROUTER=OFF", "-DWITH_NDB=OFF"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "CMAKE_OSX_ARCHITECTURES": "arm64" },
+        "dependencies": ["openssl-3.5"],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "phpmyadmin-5.2.3",
+      "kind": "phpmyadmin",
+      "version": "5.2.3",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "index": "index.php" },
+      "extensions": [],
+      "hashes": {},
+      "license": "GPL-2.0-only",
+      "source": {
+        "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.tar.xz",
+        "sha256": "57881348297c4412f86c410547cf76b4d8a236574dd2c6b7d6a2beebe7fc44e3",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": ["php-8.5"],
+      "build": {
+        "buildSystem": "verified-archive",
+        "flags": [],
+        "environment": {},
+        "dependencies": ["php-8.5"],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "mailpit-1.31.1",
+      "kind": "mailpit",
+      "version": "1.31.1",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "mailpit": "mailpit" },
+      "extensions": [],
+      "hashes": {},
+      "license": "MIT",
+      "source": {
+        "url": "https://github.com/axllent/mailpit/releases/download/v1.31.1/mailpit-darwin-arm64.tar.gz",
+        "sha256": "71c10f33f36c78a2864c4df906f11736b092a80ad1371742bd4e90e65d778e1b",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [],
+      "build": {
+        "buildSystem": "verified-archive",
+        "flags": [],
+        "environment": {},
+        "dependencies": [],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "composer-2.10.3",
+      "kind": "composer",
+      "version": "2.10.3",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "composer": "bin/composer", "phar": "composer.phar" },
+      "extensions": [],
+      "hashes": {},
+      "license": "MIT",
+      "source": {
+        "url": "https://getcomposer.org/download/2.10.3/composer.phar",
+        "sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": ["php-8.5"],
+      "build": {
+        "buildSystem": "verified-phar",
+        "flags": ["self-update disabled by wrapper"],
+        "environment": {},
+        "dependencies": ["php-8.5"],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "imagemagick-7.1",
+      "kind": "library",
+      "version": "7.1.2-32",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "magick": "bin/magick" },
+      "extensions": [],
+      "hashes": {},
+      "license": "ImageMagick",
+      "source": {
+        "url": "https://download.imagemagick.org/archive/releases/ImageMagick-7.1.2-32.tar.xz",
+        "sha256": "9f32b378f14e6a5357b5b901351ebe8d8c8b86e6b7a4299b3c95336ecfc92642",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": ["--disable-static", "--enable-shared", "--without-x", "--without-perl", "--without-opencl", "--with-modules=no"],
+        "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
+        "dependencies": [],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "xdebug-php74",
+      "kind": "php-extension",
+      "version": "3.1.6",
+      "abi": "20190902-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "extension": "lib/php/extensions/xdebug.so" },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": { "url": "https://xdebug.org/files/xdebug-3.1.6.tgz", "sha256": "554eca0b4d5b7b93cb2258fab0b0bd84cc8721e74322a2255c14e137cbcad5d2", "patches": [] },
+      "supportState": "legacy",
+      "dependencyPaths": ["php-7.4"],
+      "build": { "buildSystem": "phpize/configure/make", "flags": [], "environment": {}, "dependencies": ["php-7.4"], "patchSources": [] }
+    },
+    {
+      "id": "xdebug-php85",
+      "kind": "php-extension",
+      "version": "3.5.3",
+      "abi": "20250925-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "extension": "lib/php/extensions/xdebug.so" },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": { "url": "https://xdebug.org/files/xdebug-3.5.3.tgz", "sha256": "f073de91bea046106abf4d6071c963ea71e58571df6ce58948ceca89d121cb2d", "patches": [] },
+      "supportState": "supported",
+      "dependencyPaths": ["php-8.5"],
+      "build": { "buildSystem": "phpize/configure/make", "flags": [], "environment": {}, "dependencies": ["php-8.5"], "patchSources": [] }
+    },
+    {
+      "id": "redis-php",
+      "kind": "php-extension",
+      "version": "6.3.0",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "extension": "lib/php/extensions/redis.so" },
+      "extensions": [],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": { "url": "https://pecl.php.net/get/redis-6.3.0.tgz", "sha256": "0d5141f634bd1db6c1ddcda053d25ecf2c4fc1c395430d534fd3f8d51dd7f0b5", "patches": [] },
+      "supportState": "supported",
+      "dependencyPaths": ["php-7.4", "php-8.5"],
+      "build": { "buildSystem": "phpize/configure/make", "flags": ["built once per PHP ABI"], "environment": {}, "dependencies": ["php-7.4", "php-8.5"], "patchSources": [] }
+    },
+    {
+      "id": "imagick-php",
+      "kind": "php-extension",
+      "version": "3.8.1",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": { "extension": "lib/php/extensions/imagick.so" },
+      "extensions": [],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": { "url": "https://pecl.php.net/get/imagick-3.8.1.tgz", "sha256": "3a3587c0a524c17d0dad9673a160b90cd776e836838474e173b549ed864352ee", "patches": [] },
+      "supportState": "supported",
+      "dependencyPaths": ["php-7.4", "php-8.5", "imagemagick-7.1"],
+      "build": { "buildSystem": "phpize/configure/make", "flags": ["built once per PHP ABI"], "environment": {}, "dependencies": ["php-7.4", "php-8.5", "imagemagick-7.1"], "patchSources": [] }
+    }
+  ]
 }
-
