@@ -30,4 +30,6 @@ while IFS=$'\t' read -r id version url sha256; do
     echo "verified dependency source: $id $version"
 done < <({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; } | /usr/bin/sort -u)
 
+DEVSTACK_BUILD_TOOLS_VERIFY_ONLY=1 "$repository_root/scripts/fetch-build-tools.sh"
+
 echo "All locked sources verified under $runtime_cache"

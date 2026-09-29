@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "tools": [
+    {
+      "id": "cmake",
+      "version": "4.4.3",
+      "kind": "prebuilt-archive",
+      "url": "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-4.4.3-macos-universal.tar.gz",
+      "sha256": "0c5d65251c14cc884bfa16bdbed3c263ce5bffe2e21c0d0d00962cb0610464fa"
+    },
+    {
+      "id": "m4",
+      "version": "1.4.21",
+      "kind": "autotools-source",
+      "url": "https://ftp.gnu.org/gnu/m4/m4-1.4.21.tar.xz",
+      "sha256": "f25c6ab51548a73a75558742fb031e0625d6485fe5f9155949d6486a2408ab66"
+    },
+    {
+      "id": "autoconf",
+      "version": "2.73",
+      "kind": "autotools-source",
+      "url": "https://ftp.gnu.org/gnu/autoconf/autoconf-2.73.tar.xz",
+      "sha256": "9fd672b1c8425fac2fa67fa0477b990987268b90ff36d5f016dae57be0d6b52e"
+    },
+    {
+      "id": "automake",
+      "version": "1.19",
+      "kind": "autotools-source",
+      "url": "https://ftp.gnu.org/gnu/automake/automake-1.19.tar.xz",
+      "sha256": "e3e2c2e3abf37898138db5b6c1d1dc35c9160c5978be7947d2c741705251d445"
+    },
+    {
+      "id": "libtool",
+      "version": "2.6.2",
+      "kind": "autotools-source",
+      "url": "https://ftp.gnu.org/gnu/libtool/libtool-2.6.2.tar.xz",
+      "sha256": "2ef1067c16c97db930fd740cc9bc3d3ba9a583804ae5ac42cc3e8719e49e191e"
+    },
+    {
+      "id": "pkgconf",
+      "version": "3.0.7",
+      "kind": "autotools-source",
+      "url": "https://github.com/pkgconf/pkgconf/releases/download/pkgconf-3.0.7/pkgconf-3.0.7.tar.xz",
+      "sha256": "c926ff491cbd9a331a589160811bd97ab1749b4d5198a519338f2cdfabe6940a"
+    },
+    {
+      "id": "ninja",
+      "version": "1.13.2",
+      "kind": "cmake-source",
+      "url": "https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz",
+      "sha256": "974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17"
+    }
+  ]
+}

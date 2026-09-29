@@ -4,12 +4,12 @@ DevStack never builds or downloads software on an installed Mac. These scripts r
 
 The source of truth is `Sources/DevStackApp/Resources/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
 
-Run `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` then runs the two feasibility gates fail-closed, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set.
+Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` then runs the two feasibility gates fail-closed, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set.
 
 ## Required build host
 
 - Apple Silicon running macOS 27 with full Xcode selected by `xcode-select`.
-- CMake, Ninja, Autoconf, Automake, libtool, and pkg-config supplied as pinned build tools; they are build-host inputs and are never packaged.
+- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. Put `.build/build-tools/bin` first on `PATH` before running the other scripts.
 - An Apple Developer ID Application identity and notarization keychain profile for a distributable image.
 
 No Homebrew or MacPorts prefix is accepted by the audit, even on the release machine.
