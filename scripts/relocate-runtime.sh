@@ -37,11 +37,13 @@ while IFS= read -r -d '' binary; do
     done < <(/usr/bin/otool -l "$binary" | /usr/bin/awk '/LC_RPATH/{getline; getline; print $2}')
 
     binary_directory="$(dirname "$binary")"
-    for library_directory in "${library_directories[@]}"; do
-        relative="$(/usr/bin/python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$library_directory" "$binary_directory")"
-        rpath="@loader_path/$relative"
-        /usr/bin/install_name_tool -add_rpath "$rpath" "$binary" 2>/dev/null || true
-    done
+    if [[ ${#library_directories[@]} -gt 0 ]]; then
+        for library_directory in "${library_directories[@]}"; do
+            relative="$(/usr/bin/python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$library_directory" "$binary_directory")"
+            rpath="@loader_path/$relative"
+            /usr/bin/install_name_tool -add_rpath "$rpath" "$binary" 2>/dev/null || true
+        done
+    fi
     /usr/bin/codesign --force --sign - --timestamp=none "$binary"
 done < <(/usr/bin/find "$runtime_root" -type f -print0)
 

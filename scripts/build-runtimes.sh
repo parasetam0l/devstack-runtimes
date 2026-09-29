@@ -29,12 +29,31 @@ for runtime_id in "${requested[@]}"; do
     rm -rf "$component_work"
     mkdir -p "$component_work/source"
 
+    extract_source() {
+        local archive="$1" destination="$2"
+        case "$archive" in
+            *.tar.gz|*.tgz) /usr/bin/tar -xzf "$archive" -C "$destination" ;;
+            *.tar.bz2) /usr/bin/tar -xjf "$archive" -C "$destination" ;;
+            *.tar.xz) /usr/bin/tar -xJf "$archive" -C "$destination" ;;
+            *) echo "Unsupported source archive: $archive" >&2; exit 65 ;;
+        esac
+        # Most archives wrap the payload in a single top-level directory, while
+        # some (Mailpit) do not and PECL archives mix metadata files with a
+        # source directory. Flatten the source directory when exactly one exists
+        # so every recipe sees the same layout.
+        local directories=() entry
+        while IFS= read -r entry; do
+            [[ -d "$entry" ]] && directories+=("$entry")
+        done < <(/usr/bin/find "$destination" -mindepth 1 -maxdepth 1)
+        if [[ ${#directories[@]} -eq 1 ]]; then
+            /usr/bin/find "${directories[0]}" -mindepth 1 -maxdepth 1 -exec /bin/mv {} "$destination/" \;
+            /bin/rmdir "${directories[0]}"
+        fi
+    }
+
     case "$archive" in
-        *.phar) cp "$archive" "$component_work/source/composer.phar" ;;
-        *.tar.gz|*.tgz) /usr/bin/tar -xzf "$archive" -C "$component_work/source" --strip-components=1 ;;
-        *.tar.bz2) /usr/bin/tar -xjf "$archive" -C "$component_work/source" --strip-components=1 ;;
-        *.tar.xz) /usr/bin/tar -xJf "$archive" -C "$component_work/source" --strip-components=1 ;;
-        *) echo "Unsupported source archive: $archive" >&2; exit 65 ;;
+        *.phar) /bin/cp "$archive" "$component_work/source/composer.phar" ;;
+        *) extract_source "$archive" "$component_work/source" ;;
     esac
 
     if [[ "$runtime_id" == "php-7.4" ]]; then
