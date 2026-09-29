@@ -123,12 +123,17 @@ for filename, (name, version, libs, cflags) in items.items():
     )
 PY
     # PHP's bzip2 and iconv checks only probe explicit -I directories, never
-    # CPPFLAGS, so the SDK headers are staged in the dependency prefix.
+    # CPPFLAGS, so the SDK headers are staged in the dependency prefix. The
+    # iconv check also requires a library file next to the header; the SDK's
+    # link stub points at the system /usr/lib/libiconv.2.dylib.
     if [[ -f "$sdk/usr/include/bzlib.h" ]]; then
         cp "$sdk/usr/include/bzlib.h" "$prefix/include/bzlib.h"
     fi
     if [[ -f "$sdk/usr/include/iconv.h" ]]; then
         cp "$sdk/usr/include/iconv.h" "$prefix/include/iconv.h"
+    fi
+    if [[ -f "$sdk/usr/lib/libiconv.tbd" ]]; then
+        cp "$sdk/usr/lib/libiconv.tbd" "$prefix/lib/libiconv.tbd"
     fi
 }
 
