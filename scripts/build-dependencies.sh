@@ -106,13 +106,15 @@ def header_version(header: pathlib.Path, macro: str, fallback: str) -> str:
 
 libxml_version = header_version(sdk / "usr/include/libxml2/libxml/xmlversion.h", "LIBXML_DOTTED_VERSION", "2.9.4")
 libxslt_version = header_version(sdk / "usr/include/libxslt/xsltconfig.h", "LIBXSLT_DOTTED_VERSION", "1.1.0")
+sqlite_version = header_version(sdk / "usr/include/sqlite3.h", "SQLITE_VERSION", "3.7.7")
+libcurl_version = header_version(sdk / "usr/include/curl/curlver.h", "LIBCURL_VERSION", "7.61.0")
 
 items = {
     "libxml-2.0": ("libxml2", libxml_version, "-lxml2", f"-I{sdk}/usr/include/libxml2"),
     "libxslt": ("libxslt", libxslt_version, "-lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
     "libexslt": ("libexslt", libxslt_version, "-lexslt -lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
-    "libcurl": ("libcurl", "8.0.0", "-lcurl", f"-I{sdk}/usr/include"),
-    "sqlite3": ("sqlite3", "3.0.0", "-lsqlite3", f"-I{sdk}/usr/include"),
+    "libcurl": ("libcurl", libcurl_version, "-lcurl", f"-I{sdk}/usr/include"),
+    "sqlite3": ("sqlite3", sqlite_version, "-lsqlite3", f"-I{sdk}/usr/include"),
 }
 for filename, (name, version, libs, cflags) in items.items():
     (pc / f"{filename}.pc").write_text(
