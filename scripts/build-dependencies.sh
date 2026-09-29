@@ -89,17 +89,36 @@ create_system_pc_files() {
     mkdir -p "$prefix/lib/pkgconfig"
     /usr/bin/python3 - "$prefix" "$sdk" <<'PY'
 import pathlib, sys
+
 prefix, sdk = map(pathlib.Path, sys.argv[1:])
 pc = prefix / "lib/pkgconfig"
+
+
+def header_version(header: pathlib.Path, macro: str, fallback: str) -> str:
+    try:
+        for line in header.read_text(errors="ignore").splitlines():
+            if line.startswith(f"#define {macro} ") and '"' in line:
+                return line.split('"')[1]
+    except OSError:
+        pass
+    return fallback
+
+
+libxml_version = header_version(sdk / "usr/include/libxml2/libxml/xmlversion.h", "LIBXML_DOTTED_VERSION", "2.9.4")
+libxslt_version = header_version(sdk / "usr/include/libxslt/xsltconfig.h", "LIBXSLT_DOTTED_VERSION", "1.1.0")
+
 items = {
-    "libxml-2.0": ("libxml2", "2.9.0", "-lxml2", f"-I{sdk}/usr/include/libxml2"),
-    "libxslt": ("libxslt", "1.1.0", "-lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
-    "libexslt": ("libexslt", "0.8.0", "-lexslt -lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
+    "libxml-2.0": ("libxml2", libxml_version, "-lxml2", f"-I{sdk}/usr/include/libxml2"),
+    "libxslt": ("libxslt", libxslt_version, "-lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
+    "libexslt": ("libexslt", libxslt_version, "-lexslt -lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
     "libcurl": ("libcurl", "8.0.0", "-lcurl", f"-I{sdk}/usr/include"),
     "sqlite3": ("sqlite3", "3.0.0", "-lsqlite3", f"-I{sdk}/usr/include"),
 }
 for filename, (name, version, libs, cflags) in items.items():
-    (pc / f"{filename}.pc").write_text(f"prefix=/usr\nName: {name}\nVersion: {version}\nLibs: {libs}\nCflags: {cflags}\n", encoding="utf-8")
+    (pc / f"{filename}.pc").write_text(
+        f"prefix=/usr\nName: {name}\nDescription: {name} system library\nVersion: {version}\nLibs: {libs}\nCflags: {cflags}\n",
+        encoding="utf-8",
+    )
 PY
 }
 
