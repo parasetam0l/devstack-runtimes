@@ -13,6 +13,7 @@
     { "id": "libsodium", "version": "1.0.20", "url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz", "sha256": "ebb65ef6ca439333c2bb41a0c1990587288da07f6c7fd07cb3a18cc18d30ce19", "license": "ISC", "targets": ["php"] },
     { "id": "gmp", "version": "6.3.0", "url": "https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz", "sha256": "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898", "license": "LGPL-3.0-or-later OR GPL-2.0-or-later", "targets": ["php"] },
     { "id": "tidy", "version": "5.8.0", "url": "https://github.com/htacg/tidy-html5/archive/refs/tags/5.8.0.tar.gz", "sha256": "59c86d5b2e452f63c5cdb29c866a12a4c55b1741d7025cf2f3ce0cde99b0660e", "license": "HTMLTIDY", "targets": ["php"] },
-    { "id": "gettext", "version": "0.26", "url": "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz", "sha256": "d1fb86e260cfe7da6031f94d2e44c0da55903dbae0a2fa0fae78c91ae1b56f00", "license": "GPL-3.0-or-later AND LGPL-2.1-or-later", "targets": ["php"] }
+    { "id": "gettext", "version": "0.26", "url": "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.xz", "sha256": "d1fb86e260cfe7da6031f94d2e44c0da55903dbae0a2fa0fae78c91ae1b56f00", "license": "GPL-3.0-or-later AND LGPL-2.1-or-later", "targets": ["php"] },
+    { "id": "boost", "version": "1.84.0", "url": "https://archives.boost.io/release/1.84.0/source/boost_1_84_0.tar.gz", "sha256": "a5800f405508f5df8114558ca9855d2640a2de8f0445f051fa1c7c3383045724", "license": "BSL-1.0", "targets": ["mysql"] }
   ]
 }

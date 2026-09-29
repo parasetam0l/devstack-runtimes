@@ -190,6 +190,16 @@ if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     /usr/bin/find "$dependency_root/php-7.4" \( -name '*.pc' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' 's|/php-8.5/|/php-7.4/|g' {} +
 fi
 
+if [[ "$requested" == "all" || "$requested" == "mysql" ]]; then
+    # MySQL 8.4 always includes Boost from extra/boost/boost_1_84_0 in its
+    # source tree; the upstream MySQL tarball does not bundle it.
+    boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
+    rm -rf "$dependency_root/mysql-8.4"
+    while IFS=$'\t' read -r id version url sha256; do
+        fetch_and_extract "$id" "$version" "$url" "$sha256" "$boost_root"
+    done < <("$repository_root/scripts/dependency-lock.py" mysql)
+fi
+
 if [[ -n "$dependency_test_failures" ]]; then
     echo "Dependency test suites with reported failures:$dependency_test_failures" >&2
 fi

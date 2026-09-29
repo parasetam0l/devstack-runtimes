@@ -28,7 +28,7 @@ while IFS=$'\t' read -r id version url sha256; do
     fi
     mv "$destination.partial" "$destination"
     echo "verified dependency source: $id $version"
-done < <({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; } | /usr/bin/sort -u)
+done < <({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; "$repository_root/scripts/dependency-lock.py" mysql; } | /usr/bin/sort -u)
 
 DEVSTACK_BUILD_TOOLS_VERIFY_ONLY=1 "$repository_root/scripts/fetch-build-tools.sh"
 

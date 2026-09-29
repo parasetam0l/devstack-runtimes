@@ -115,6 +115,12 @@ case "$runtime_id" in
         ;;
     mysql-5.7|mysql-8.4)
         require_tool cmake
+        boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
+        if [[ -d "$boost_root" ]]; then
+            mkdir -p "$source_directory/extra/boost"
+            rm -rf "$source_directory/extra/boost/boost_1_84_0"
+            ln -s "$boost_root" "$source_directory/extra/boost/boost_1_84_0"
+        fi
         mkdir -p "$build_directory" "$prefix"
         cd "$build_directory"
         cmake "$source_directory" \
