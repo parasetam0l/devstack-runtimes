@@ -67,7 +67,9 @@ build_autotools() {
 build_cmake() {
     local source="$1" prefix="$2"
     shift 2
-    cmake -S "$source" -B "$source/.devstack-build" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON "$@"
+    # Older projects pin a pre-3.5 cmake_minimum_required, which CMake 4 refuses
+    # unless the policy floor is set explicitly.
+    cmake -S "$source" -B "$source/.devstack-build" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 "$@"
     cmake --build "$source/.devstack-build" --parallel "$jobs"
     cmake --install "$source/.devstack-build"
     run_check_suite "${source##*/}" ctest --test-dir "$source/.devstack-build" --output-on-failure
@@ -135,6 +137,9 @@ if [[ "$requested" == "all" || "$requested" == "apache" ]]; then build_target ap
 if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     build_target php "$dependency_root/php-8.5"
     cp -R "$dependency_root/php-8.5" "$dependency_root/php-7.4"
+    # Point the copied pkg-config and config metadata at its own prefix so the
+    # two PHP dependency trees resolve independently.
+    /usr/bin/find "$dependency_root/php-7.4" \( -name '*.pc' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' 's|/php-8.5/|/php-7.4/|g' {} +
 fi
 
 if [[ -n "$dependency_test_failures" ]]; then
