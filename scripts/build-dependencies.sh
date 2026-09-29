@@ -8,8 +8,8 @@ dependency_root="${DEVSTACK_DEPENDENCY_ROOT:-$repository_root/.build/runtime-dep
 jobs="$(sysctl -n hw.logicalcpu)"
 sdk="$(xcrun --show-sdk-path)"
 export MACOSX_DEPLOYMENT_TARGET=27.0
-export CFLAGS="-arch arm64 -O2"
-export CXXFLAGS="-arch arm64 -O2"
+export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
+export CXXFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 
 [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]] || { echo "Dependencies require Apple Silicon macOS." >&2; exit 69; }
 command -v cmake >/dev/null || { echo "CMake is required on the build host." >&2; exit 69; }
@@ -103,6 +103,19 @@ for filename, (name, version, libs, cflags) in items.items():
 PY
 }
 
+build_gettext() {
+    local source="$1" prefix="$2"
+    mkdir -p "$source/.devstack-build"
+    cd "$source/.devstack-build"
+    PKG_CONFIG_PATH="$prefix/lib/pkgconfig" "$source/configure" --prefix="$prefix" --enable-shared --disable-static --disable-java --disable-csharp --without-git --disable-curses
+    # Only gettext-runtime is needed: it installs libintl for PHP's gettext
+    # extension. gettext-tools' bundled libtextstyle does not link on current
+    # clang, and none of the packaged runtimes use msgfmt or xgettext.
+    make -C gettext-runtime -j "$jobs"
+    make -C gettext-runtime install
+    run_check_suite gettext-runtime make -C gettext-runtime check
+}
+
 build_target() {
     local target="$1" prefix="$2"
     rm -rf "$prefix"
@@ -126,7 +139,7 @@ build_target() {
             libsodium) build_autotools "$source" "$prefix" ;;
             gmp) build_autotools "$source" "$prefix" --enable-cxx ;;
             tidy) build_cmake "$source" "$prefix" -DSUPPORT_CONSOLE_APP=OFF ;;
-            gettext) build_autotools "$source" "$prefix" --disable-java --disable-csharp --without-git --disable-curses ;;
+            gettext) build_gettext "$source" "$prefix" ;;
             *) echo "No dependency recipe for $id" >&2; exit 64 ;;
         esac
     done < <("$repository_root/scripts/dependency-lock.py" "$target")
