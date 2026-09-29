@@ -20,6 +20,8 @@ Apache dependencies must be built into `.build/runtime-dependencies/apache-2.4`.
 
 Every dependency is built with its upstream test suite and the results are recorded. A failing suite is reported and, unless `DEVSTACK_STRICT_TEST_SUITES=1` is set, does not stop the release so that environmental failures such as macOS iconv's UTF-7 mapping do not block it; review the build log for the recorded suites.
 
+For a preview payload, `DEVSTACK_DEFER_TEST_SUITES=1` skips the long PHP, PHP-extension, and MySQL suites; their build directories are preserved so the suites can be re-run before release. OpenSSL's suite always runs because dependent runtimes must be built against a passing OpenSSL.
+
 PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.8 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
 
 The final release procedure runs all applicable upstream test suites, `DevStackCoreChecks`, the two feasibility gates, runtime auditing, nested signing, app signing, DMG signing, notarization, stapling, Gatekeeper assessment, and a network-disabled clean-machine acceptance pass.

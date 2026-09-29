@@ -44,7 +44,11 @@ build_php_extension() {
     PKG_CONFIG_PATH="$output_root/imagemagick-7.1/lib/pkgconfig" ./configure \
         --with-php-config="$php_prefix/bin/php-config"
     make -j "$jobs"
-    make test TESTS="--show-diff"
+    if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
+        echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the $extension_name test suite for this pass." >&2
+    else
+        make test TESTS="--show-diff"
+    fi
     mkdir -p "$php_prefix/lib/php/extensions"
     cp "modules/$extension_name.so" "$php_prefix/lib/php/extensions/$extension_name.so"
 }
@@ -86,8 +90,7 @@ case "$runtime_id" in
         [[ -d "$dependencies/lib/pkgconfig" ]] || {
             echo "The isolated PHP dependency tree is missing: $dependencies" >&2
             exit 69
-        }
-        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
+        }        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
         export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -Wl,-rpath,@loader_path/../lib"
         configure_make_install \
@@ -98,7 +101,11 @@ case "$runtime_id" in
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
             --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy --with-xsl --with-zip
         cd "$build_directory"
-        NO_INTERACTION=1 make test TESTS="--show-diff"
+        if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
+            echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the PHP test suite for this pass." >&2
+        else
+            NO_INTERACTION=1 make test TESTS="--show-diff"
+        fi
         mkdir -p "$prefix/lib"
         find "$dependencies/lib" -type f -name '*.dylib' -maxdepth 3 -exec cp {} "$prefix/lib/" \;
         find "$openssl_prefix/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
@@ -113,7 +120,11 @@ case "$runtime_id" in
             -DCMAKE_BUILD_TYPE=Release -DWITH_SSL="$output_root/openssl-3.5" \
             -DWITH_UNIT_TESTS=ON -DWITH_ROUTER=OFF -DWITH_NDB=OFF -DDOWNLOAD_BOOST=OFF
         cmake --build . --parallel "$jobs"
-        ctest --output-on-failure
+        if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
+            echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring ctest for this pass." >&2
+        else
+            ctest --output-on-failure
+        fi
         cmake --install .
         mkdir -p "$prefix/lib"
         find "$output_root/openssl-3.5/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
