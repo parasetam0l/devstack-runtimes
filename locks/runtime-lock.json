@@ -309,8 +309,8 @@
       "hashes": {},
       "license": "ImageMagick",
       "source": {
-        "url": "https://download.imagemagick.org/archive/releases/ImageMagick-7.1.2-32.tar.xz",
-        "sha256": "9f32b378f14e6a5357b5b901351ebe8d8c8b86e6b7a4299b3c95336ecfc92642",
+        "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-32/ImageMagick-7.1.2-32.tar.xz",
+        "sha256": "abc38dad4adfbab671857822499e69c8745278a914f5d38517baecd400b820c2",
         "patches": []
       },
       "supportState": "supported",
