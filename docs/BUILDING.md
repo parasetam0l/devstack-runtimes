@@ -16,7 +16,7 @@ No Homebrew or MacPorts prefix is accepted by the audit, even on the release mac
 
 ## Isolated dependencies
 
-Apache dependencies must be built into `.build/runtime-dependencies/apache-2.4`. PHP dependencies must be built independently into `.build/runtime-dependencies/php-7.4` and `.build/runtime-dependencies/php-8.5`. Their `pkg-config` metadata must resolve only inside the corresponding prefix. The required dylibs are copied into each final runtime, keeping the shipped trees independent. The build deliberately fails if these trees are absent; it never falls back to `/opt/homebrew`, `/usr/local`, or `/opt/local`.
+Apache dependencies must be built into `.build/runtime-dependencies/apache-2.4`. PHP dependencies are built into `.build/runtime-dependencies/php-8.5` and copied into a separate `.build/runtime-dependencies/php-7.4` prefix, so each PHP runtime resolves its own dependency tree. Their `pkg-config` metadata must resolve only inside the corresponding prefix. The required dylibs are copied into each final runtime, keeping the shipped trees independent. The build deliberately fails if these trees are absent; it never falls back to `/opt/homebrew`, `/usr/local`, or `/opt/local`.
 
 PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.8 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
 

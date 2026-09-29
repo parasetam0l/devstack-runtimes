@@ -20,7 +20,7 @@
       "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib"],
       "build": {
         "buildSystem": "Configure/make",
-        "flags": ["darwin64-arm64-cc", "shared", "no-tests", "--libdir=lib"],
+        "flags": ["darwin64-arm64-cc", "shared", "--libdir=lib"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0" },
         "dependencies": [],
         "patchSources": [],
@@ -46,7 +46,7 @@
       "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib"],
       "build": {
         "buildSystem": "configure/make",
-        "flags": ["--enable-so", "--enable-ssl", "--enable-http2", "--enable-proxy", "--enable-proxy-fcgi", "--enable-proxy-http", "--with-mpm=event"],
+        "flags": ["--enable-so", "--enable-ssl", "--enable-http2", "--enable-proxy", "--enable-proxy-fcgi", "--enable-proxy-http", "--enable-rewrite", "--enable-headers", "--with-mpm=event"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
         "dependencies": ["openssl-3.5", "apr", "apr-util", "pcre2"],
         "patchSources": []
@@ -102,7 +102,7 @@
       "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib", "@rpath/libMagickWand-7.Q16HDRI.10.dylib"],
       "build": {
         "buildSystem": "configure/make",
-        "flags": ["--disable-cgi", "--enable-fpm", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
+        "flags": ["--disable-cgi", "--enable-fpm", "--enable-opcache", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
         "dependencies": ["openssl-3.5", "imagemagick-7.1", "zlib", "libpng", "icu", "oniguruma", "libzip", "libsodium", "gmp", "tidy", "gettext", "macOS-libxml2", "macOS-libxslt", "macOS-libcurl", "macOS-sqlite3"],
         "patchSources": [
@@ -166,7 +166,7 @@
       "dependencyPaths": ["@rpath/libssl.3.dylib", "@rpath/libcrypto.3.dylib", "@rpath/libMagickWand-7.Q16HDRI.10.dylib"],
       "build": {
         "buildSystem": "configure/make",
-        "flags": ["--disable-cgi", "--enable-fpm", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
+        "flags": ["--disable-cgi", "--enable-fpm", "--enable-opcache", "--enable-bcmath", "--enable-calendar", "--enable-exif", "--enable-ftp", "--enable-intl", "--enable-mbstring", "--enable-pcntl", "--enable-soap", "--enable-sockets", "--with-bz2", "--with-curl", "--with-fpm-user=$USER", "--with-fpm-group=staff", "--with-gd", "--with-gettext", "--with-gmp", "--with-mysqli=mysqlnd", "--with-openssl", "--with-pdo-mysql=mysqlnd", "--with-pdo-sqlite", "--with-sodium", "--with-sqlite3", "--with-tidy", "--with-xsl", "--with-zip"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
         "dependencies": ["openssl-3.5", "imagemagick-7.1", "zlib", "libpng", "icu", "oniguruma", "libzip", "libsodium", "gmp", "tidy", "gettext", "macOS-libxml2", "macOS-libxslt", "macOS-libcurl", "macOS-sqlite3"],
         "patchSources": []
@@ -191,7 +191,7 @@
       "dependencyPaths": [],
       "build": {
         "buildSystem": "cmake/make",
-        "flags": ["-DDOWNLOAD_BOOST=OFF", "-DWITH_BOOST=boost", "-DWITH_SSL=$OPENSSL_ROOT", "-DWITH_UNIT_TESTS=ON", "-DWITH_ROUTER=OFF", "-DWITHOUT_SERVER=OFF"],
+        "flags": ["-DDOWNLOAD_BOOST=OFF", "-DWITH_BOOST=boost", "-DWITH_SSL=$OPENSSL_ROOT", "-DWITH_UNIT_TESTS=ON", "-DWITH_ROUTER=OFF", "-DWITH_NDB=OFF", "-DWITHOUT_SERVER=OFF"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "CMAKE_OSX_ARCHITECTURES": "arm64" },
         "dependencies": ["openssl-3.5"],
         "patchSources": [],
@@ -317,7 +317,7 @@
       "dependencyPaths": [],
       "build": {
         "buildSystem": "configure/make",
-        "flags": ["--disable-static", "--enable-shared", "--without-x", "--without-perl", "--without-opencl", "--with-modules=no"],
+        "flags": ["--disable-static", "--enable-shared", "--without-x", "--without-perl", "--without-opencl", "--with-modules=no", "--disable-dependency-tracking"],
         "environment": { "MACOSX_DEPLOYMENT_TARGET": "27.0", "ARCHFLAGS": "-arch arm64" },
         "dependencies": [],
         "patchSources": []
