@@ -171,6 +171,7 @@ build_target() {
                 ;;
             oniguruma) build_autotools "$source" "$prefix" ;;
             libzip) build_cmake "$source" "$prefix" -DBUILD_TOOLS=OFF -DBUILD_REGRESS=ON -DBUILD_EXAMPLES=OFF ;;
+            libjpeg-turbo) build_cmake "$source" "$prefix" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=OFF ;;
             libsodium) build_autotools "$source" "$prefix" ;;
             gmp) build_autotools "$source" "$prefix" --enable-cxx ;;
             tidy) build_cmake "$source" "$prefix" -DSUPPORT_CONSOLE_APP=OFF ;;

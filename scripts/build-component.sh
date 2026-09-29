@@ -98,8 +98,8 @@ case "$runtime_id" in
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
             --enable-soap --enable-sockets --with-bz2="$dependencies" --with-curl --with-fpm-user="$USER" \
-            --with-fpm-group=staff --with-gd --with-gettext="$dependencies" --with-gmp \
-            --with-iconv="$dependencies" \
+            --with-fpm-group=staff --enable-gd --with-jpeg --with-gettext="$dependencies" --with-gmp \
+            --with-iconv="$dependencies" --with-zlib \
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
             --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy="$dependencies" --with-xsl --with-zip
         cd "$build_directory"
@@ -115,6 +115,9 @@ case "$runtime_id" in
         ;;
     mysql-5.7|mysql-8.4)
         require_tool cmake
+        # Build-tree tools link @rpath OpenSSL dylibs but carry no rpath of their
+        # own; let the loader fall back to the OpenSSL runtime prefix.
+        export DYLD_FALLBACK_LIBRARY_PATH="$output_root/openssl-3.5/lib:$HOME/lib:/usr/local/lib:/usr/lib"
         boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
         if [[ -d "$boost_root" ]]; then
             mkdir -p "$source_directory/extra/boost"
@@ -126,7 +129,9 @@ case "$runtime_id" in
         cmake "$source_directory" \
             -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=Release -DWITH_SSL="$output_root/openssl-3.5" \
-            -DWITH_UNIT_TESTS=ON -DWITH_ROUTER=OFF -DWITH_NDB=OFF -DDOWNLOAD_BOOST=OFF
+            -DWITH_UNIT_TESTS=ON -DWITH_ROUTER=OFF -DWITH_NDB=OFF -DWITH_NDBCLUSTER=OFF \
+            -DCMAKE_BUILD_RPATH="$output_root/openssl-3.5/lib" \
+            -DDOWNLOAD_BOOST=OFF
         cmake --build . --parallel "$jobs"
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
             echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring ctest for this pass." >&2
