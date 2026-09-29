@@ -35,6 +35,7 @@ while IFS= read -r -d '' binary; do
         case "$dependency" in
             @rpath/*|@loader_path/*|@executable_path/*|/usr/lib/*|/System/Library/*) ;;
             /*) echo "Unrelocated absolute dependency in $binary: $dependency" >&2; failures=$((failures + 1)) ;;
+            *) echo "Unrelocated bare dependency in $binary: $dependency" >&2; failures=$((failures + 1)) ;;
         esac
     done < <(printf '%s\n' "$dependencies" | /usr/bin/tail -n +2 | /usr/bin/awk '{print $1}')
     if /usr/bin/otool -l "$binary" | /usr/bin/grep -A2 LC_RPATH | /usr/bin/grep -E '/opt/homebrew|/usr/local|/opt/local|Cellar|MacPorts' >/dev/null; then

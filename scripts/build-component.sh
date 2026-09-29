@@ -81,8 +81,8 @@ case "$runtime_id" in
             --with-apr="$dependencies/bin/apr-1-config" --with-apr-util="$dependencies/bin/apu-1-config" \
             --with-pcre="$dependencies/bin/pcre2-config"
         mkdir -p "$prefix/lib"
-        find "$dependencies/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
-        find "$openssl_prefix/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
+        find "$dependencies/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
+        find "$openssl_prefix/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
     php-7.4|php-8.5)
         openssl_prefix="$output_root/openssl-3.5"
@@ -109,9 +109,9 @@ case "$runtime_id" in
             NO_INTERACTION=1 make test TESTS="--show-diff"
         fi
         mkdir -p "$prefix/lib"
-        find "$dependencies/lib" -type f -name '*.dylib' -maxdepth 3 -exec cp {} "$prefix/lib/" \;
-        find "$openssl_prefix/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
-        find "$output_root/imagemagick-7.1/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
+        find "$dependencies/lib" -name '*.dylib' -maxdepth 3 -exec cp -R {} "$prefix/lib/" \;
+        find "$openssl_prefix/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
+        find "$output_root/imagemagick-7.1/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
     mysql-5.7|mysql-8.4)
         require_tool cmake
@@ -135,7 +135,7 @@ case "$runtime_id" in
         fi
         cmake --install .
         mkdir -p "$prefix/lib"
-        find "$output_root/openssl-3.5/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
+        find "$output_root/openssl-3.5/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
     phpmyadmin-5.2.3)
         rm -rf "$prefix"

@@ -25,6 +25,11 @@ while IFS= read -r -d '' binary; do
         done
         if [[ -n "$replacement" ]]; then
             /usr/bin/install_name_tool -change "$dependency" "$replacement" "$binary"
+        elif [[ "$dependency" != /* && "$dependency" != @* ]]; then
+            # Some libraries (for example ICU) install a bare library name as
+            # the install name; pin it to the runtime's @rpath so it resolves
+            # from the payload instead of the loader's default paths.
+            /usr/bin/install_name_tool -change "$dependency" "@rpath/$(basename "$dependency")" "$binary"
         fi
     done < <(/usr/bin/otool -L "$binary" | /usr/bin/tail -n +2 | /usr/bin/awk '{print $1}')
 
