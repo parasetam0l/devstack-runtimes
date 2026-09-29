@@ -97,8 +97,10 @@ case "$runtime_id" in
         if [[ "$runtime_id" == "php-7.4" ]]; then
             # Modern clang turns PHP 7.4's UB GD build test into a trap at -O2;
             # build the legacy runtime at -O1 so the configure run test passes.
+            # ICU 78 headers need C++17, while intl's config pins -std=c++11;
+            # our CXXFLAGS come later on the compile line and override it.
             export CFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
-            export CXXFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
+            export CXXFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types -std=gnu++17"
         fi
         configure_make_install \
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
