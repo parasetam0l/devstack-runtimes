@@ -94,6 +94,12 @@ case "$runtime_id" in
         export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
         export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -lresolv -Wl,-rpath,@loader_path/../lib"
+        if [[ "$runtime_id" == "php-7.4" ]]; then
+            # Modern clang turns PHP 7.4's UB GD build test into a trap at -O2;
+            # build the legacy runtime at -O1 so the configure run test passes.
+            export CFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
+            export CXXFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
+        fi
         configure_make_install \
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
@@ -103,6 +109,11 @@ case "$runtime_id" in
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
             --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy="$dependencies" --with-xsl --with-zip
         cd "$build_directory"
+        # PHP's install can leave a dangling bin/phar symlink when phar.phar was
+        # not generated; remove it so the payload is self-consistent.
+        if [[ -L "$prefix/bin/phar" && ! -e "$prefix/bin/phar.phar" ]]; then
+            rm -f "$prefix/bin/phar"
+        fi
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
             echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the PHP test suite for this pass." >&2
         else
