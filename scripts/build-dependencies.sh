@@ -10,6 +10,7 @@ sdk="$(xcrun --show-sdk-path)"
 export MACOSX_DEPLOYMENT_TARGET=27.0
 export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 export CXXFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
+export LDFLAGS="-Wl,-headerpad_max_install_names"
 
 [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]] || { echo "Dependencies require Apple Silicon macOS." >&2; exit 69; }
 command -v cmake >/dev/null || { echo "CMake is required on the build host." >&2; exit 69; }
@@ -188,7 +189,9 @@ if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     cp -R "$dependency_root/php-8.5" "$dependency_root/php-7.4"
     # Point the copied pkg-config and config metadata at its own prefix so the
     # two PHP dependency trees resolve independently.
-    /usr/bin/find "$dependency_root/php-7.4" \( -name '*.pc' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' 's|/php-8.5/|/php-7.4/|g' {} +
+    /usr/bin/find "$dependency_root/php-7.4" \( -name '*.pc' -o -name '*.la' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' 's|/php-8.5/|/php-7.4/|g' {} +
+    "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/php-8.5"
+    "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/php-7.4"
 fi
 
 if [[ "$requested" == "all" || "$requested" == "mysql" ]]; then

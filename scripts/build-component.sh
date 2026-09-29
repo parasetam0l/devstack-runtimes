@@ -91,9 +91,10 @@ case "$runtime_id" in
             echo "The isolated PHP dependency tree is missing: $dependencies" >&2
             exit 69
         }
+        "${DEVSTACK_REPOSITORY_ROOT:?}/scripts/prepare-build-libraries.sh" "$dependencies"
         export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
-        export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -lresolv -Wl,-rpath,@loader_path/../lib"
+        export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -lresolv -Wl,-rpath,$dependencies/lib -Wl,-rpath,$openssl_prefix/lib -Wl,-rpath,@loader_path/../lib"
         if [[ "$runtime_id" == "php-7.4" ]]; then
             # Modern clang turns PHP 7.4's UB GD build test into a trap at -O2;
             # build the legacy runtime at -O1 so the configure run test passes.

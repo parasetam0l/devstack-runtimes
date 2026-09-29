@@ -8,7 +8,10 @@ fi
 
 runtime_root="$(cd "$1" && pwd)"
 shift
-forbidden_roots=("$runtime_root" "$@")
+forbidden_roots=("$runtime_root")
+for root in "$@"; do
+    forbidden_roots+=("$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$root")")
+done
 library_directories=()
 while IFS= read -r directory; do library_directories+=("$directory"); done < <(/usr/bin/find "$runtime_root" -type f -name '*.dylib' -exec dirname {} \; | /usr/bin/sort -u)
 
