@@ -4,7 +4,7 @@ DevStack never builds or downloads software on an installed Mac. These scripts r
 
 The source of truth is `Sources/DevStackApp/Resources/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
 
-Run `scripts/build-dependencies.sh all`, then `scripts/build-runtimes.sh all`. After the builds, run `scripts/gates/php74.sh` and `scripts/gates/mysql57.sh`, followed by `scripts/package-release.sh`.
+Run `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` then runs the two feasibility gates fail-closed, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set.
 
 ## Required build host
 
