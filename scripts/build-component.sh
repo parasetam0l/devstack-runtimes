@@ -100,7 +100,7 @@ case "$runtime_id" in
             --enable-soap --enable-sockets --with-bz2="$dependencies" --with-curl --with-fpm-user="$USER" \
             --with-fpm-group=staff --with-gd --with-gettext --with-gmp \
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
-            --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy --with-xsl --with-zip
+            --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy="$dependencies" --with-xsl --with-zip
         cd "$build_directory"
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
             echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the PHP test suite for this pass." >&2
