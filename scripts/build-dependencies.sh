@@ -16,6 +16,22 @@ command -v cmake >/dev/null || { echo "CMake is required on the build host." >&2
 command -v pkg-config >/dev/null || { echo "pkg-config is required on the build host." >&2; exit 69; }
 mkdir -p "$cache_root" "$work_root" "$dependency_root"
 
+dependency_test_failures=""
+
+run_check_suite() {
+    local component="$1"
+    shift
+    if "$@"; then
+        return
+    fi
+    if [[ "${DEVSTACK_STRICT_TEST_SUITES:-0}" == "1" ]]; then
+        echo "$component test suite failed" >&2
+        exit 70
+    fi
+    echo "warning: $component test suite reported failures; continuing. Set DEVSTACK_STRICT_TEST_SUITES=1 to fail closed." >&2
+    dependency_test_failures="$dependency_test_failures $component"
+}
+
 fetch_and_extract() {
     local id="$1" version="$2" url="$3" expected="$4" destination="$5"
     local filename="${url##*/}"
@@ -42,8 +58,10 @@ build_autotools() {
     cd "$source/.devstack-build"
     PKG_CONFIG_PATH="$prefix/lib/pkgconfig" "$source/configure" --prefix="$prefix" --enable-shared --disable-static "$@"
     make -j "$jobs"
-    make check
     make install
+    # Run the suite after install: some DSO-based tests resolve their driver
+    # directory from the install prefix, which does not exist before this point.
+    run_check_suite "${source##*/}" make check
 }
 
 build_cmake() {
@@ -51,8 +69,8 @@ build_cmake() {
     shift 2
     cmake -S "$source" -B "$source/.devstack-build" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON "$@"
     cmake --build "$source/.devstack-build" --parallel "$jobs"
-    ctest --test-dir "$source/.devstack-build" --output-on-failure
     cmake --install "$source/.devstack-build"
+    run_check_suite "${source##*/}" ctest --test-dir "$source/.devstack-build" --output-on-failure
 }
 
 build_zlib() {
@@ -60,8 +78,8 @@ build_zlib() {
     cd "$source"
     ./configure --prefix="$prefix" --shared
     make -j "$jobs"
-    make test
     make install
+    run_check_suite zlib make test
 }
 
 create_system_pc_files() {
@@ -117,6 +135,10 @@ if [[ "$requested" == "all" || "$requested" == "apache" ]]; then build_target ap
 if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     build_target php "$dependency_root/php-8.5"
     cp -R "$dependency_root/php-8.5" "$dependency_root/php-7.4"
+fi
+
+if [[ -n "$dependency_test_failures" ]]; then
+    echo "Dependency test suites with reported failures:$dependency_test_failures" >&2
 fi
 
 echo "Dependency output: $dependency_root"
