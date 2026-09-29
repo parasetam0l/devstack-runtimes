@@ -97,7 +97,7 @@ case "$runtime_id" in
         configure_make_install \
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
-            --enable-soap --enable-sockets --with-bz2 --with-curl --with-fpm-user="$USER" \
+            --enable-soap --enable-sockets --with-bz2="$dependencies" --with-curl --with-fpm-user="$USER" \
             --with-fpm-group=staff --with-gd --with-gettext --with-gmp \
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
             --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy --with-xsl --with-zip
