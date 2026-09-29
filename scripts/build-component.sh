@@ -90,7 +90,8 @@ case "$runtime_id" in
         [[ -d "$dependencies/lib/pkgconfig" ]] || {
             echo "The isolated PHP dependency tree is missing: $dependencies" >&2
             exit 69
-        }        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
+        }
+        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
         export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -Wl,-rpath,@loader_path/../lib"
         configure_make_install \
