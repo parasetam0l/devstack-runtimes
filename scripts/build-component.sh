@@ -115,6 +115,8 @@ case "$runtime_id" in
         cmake --build . --parallel "$jobs"
         ctest --output-on-failure
         cmake --install .
+        mkdir -p "$prefix/lib"
+        find "$output_root/openssl-3.5/lib" -type f -name '*.dylib' -maxdepth 2 -exec cp {} "$prefix/lib/" \;
         ;;
     phpmyadmin-5.2.3)
         rm -rf "$prefix"
