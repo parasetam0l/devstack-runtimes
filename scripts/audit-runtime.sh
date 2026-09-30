@@ -11,6 +11,18 @@ script_directory="$(cd "$(dirname "$0")" && pwd)"
 build_root="${2:-}"
 failures=0
 
+# Symlinked dylib leaf names (for example libtidy.58.dylib ->
+# libtidy.5.8.0.dylib) must not appear as dependencies: relocation writes the
+# real basename as the install name, and dyld rejects a found dylib whose
+# install name leaf differs from the requested one.
+symlink_names_directory="$(/usr/bin/mktemp -d)"
+trap '/bin/rm -rf "$symlink_names_directory"' EXIT
+while IFS= read -r -d '' link; do
+    leaf="$(basename "$link")"
+    real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.basename(os.path.realpath(sys.argv[1])))' "$link")"
+    [[ "$leaf" == "$real" ]] || printf '%s' "$real" > "$symlink_names_directory/$leaf"
+done < <(/usr/bin/find "$runtime_directory" -type l -name '*.dylib' -print0)
+
 while IFS= read -r -d '' binary; do
     if ! /usr/bin/file "$binary" | /usr/bin/grep -q 'Mach-O'; then
         continue
@@ -37,6 +49,18 @@ while IFS= read -r -d '' binary; do
             @rpath/*|@loader_path/*|@executable_path/*|/usr/lib/*|/System/Library/*) ;;
             /*) echo "Unrelocated absolute dependency in $binary: $dependency" >&2; failures=$((failures + 1)) ;;
             *) echo "Unrelocated bare dependency in $binary: $dependency" >&2; failures=$((failures + 1)) ;;
+        esac
+        case "$dependency" in
+            @rpath/*|@loader_path/*|@executable_path/*)
+                leaf="${dependency##*/}"
+                if [[ -f "$symlink_names_directory/$leaf" ]]; then
+                    real="$(<"$symlink_names_directory/$leaf")"
+                    if [[ -n "$real" && "$real" != "$leaf" ]]; then
+                        echo "Symlink-name dependency in $binary: $dependency (install name is $real)" >&2
+                        failures=$((failures + 1))
+                    fi
+                fi
+                ;;
         esac
     done < <(printf '%s\n' "$dependencies" | /usr/bin/tail -n +2 | /usr/bin/awk '{print $1}')
     if /usr/bin/otool -l "$binary" | /usr/bin/grep -A2 LC_RPATH | /usr/bin/grep -E '/opt/homebrew|/usr/local|/opt/local|Cellar|MacPorts' >/dev/null; then
