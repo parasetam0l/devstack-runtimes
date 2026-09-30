@@ -4,7 +4,7 @@ DevStack never builds or downloads software on an installed Mac. These scripts r
 
 The source of truth is `Sources/DevStackApp/Resources/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
 
-Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` then runs the two feasibility gates fail-closed, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set.
+Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` selects the modern payload, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set. Legacy payloads are considered only with `DEVSTACK_INCLUDE_LEGACY=1` and passing feasibility gates. Failed gates never remove staged payloads.
 
 ## Required build host
 
@@ -16,7 +16,7 @@ No Homebrew or MacPorts prefix is accepted by the audit, even on the release mac
 
 ## Isolated dependencies
 
-Apache dependencies must be built into `.build/runtime-dependencies/apache-2.4`. PHP dependencies are built into `.build/runtime-dependencies/php-8.5` and copied into a separate `.build/runtime-dependencies/php-7.4` prefix, so each PHP runtime resolves its own dependency tree. MySQL 8.4 requires the Boost 1.84 headers, which the dependency lock extracts into `.build/runtime-dependencies/mysql-8.4/boost/boost_1_84_0` and links into the source tree as `extra/boost/boost_1_84_0`. Their `pkg-config` metadata must resolve only inside the corresponding prefix. The required dylibs are copied into each final runtime, keeping the shipped trees independent. The build deliberately fails if these trees are absent; it never falls back to `/opt/homebrew`, `/usr/local`, or `/opt/local`.
+Apache dependencies must be built into `.build/runtime-dependencies/apache-2.4`. PHP dependencies are built into `.build/runtime-dependencies/php-8.5` and copied into separate `.build/runtime-dependencies/php-8.4` and `.build/runtime-dependencies/php-7.4` prefixes, so each PHP runtime resolves its own dependency tree. MySQL 8.4 requires the Boost 1.84 headers, which the dependency lock extracts into `.build/runtime-dependencies/mysql-8.4/boost/boost_1_84_0` and links into the source tree as `extra/boost/boost_1_84_0`. Their `pkg-config` metadata must resolve only inside the corresponding prefix. The required dylibs are copied into each final runtime, keeping the shipped trees independent. The build deliberately fails if these trees are absent; it never falls back to `/opt/homebrew`, `/usr/local`, or `/opt/local`.
 
 Before PHP is configured, `prepare-build-libraries.sh` normalizes dependency install names to `@rpath` within each isolated prefix. PHP's build links against explicit build-prefix RPATHs so its configure probes, PHAR generator, and regression runner can load ICU and OpenSSL without `DYLD_*` variables. Release relocation removes these absolute build paths. Copied PHP 7.4 libtool metadata is also rewritten to its own prefix.
 
@@ -27,3 +27,15 @@ For a preview payload, `DEVSTACK_DEFER_TEST_SUITES=1` skips the long PHP, PHP-ex
 PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.8 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
 
 The final release procedure runs all applicable upstream test suites, `DevStackCoreChecks`, the two feasibility gates, runtime auditing, nested signing, app signing, DMG signing, notarization, stapling, Gatekeeper assessment, and a network-disabled clean-machine acceptance pass.
+
+## Current development build and safe verification
+
+The default payload includes Apache, Nginx (disabled by default), PHP 8.4/8.5, MySQL 8.4, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
+
+The successful local artifact is ad-hoc signed; packaging success is not full upstream acceptance or notarized distribution readiness. The morning evidence and unresolved failures are recorded in `Documentation/HANDOVER.md`.
+
+Upstream recipes now use `run-bounded-check.py`: checks run serially with a default 1,200-second wall limit, a per-process CPU limit, 1 GiB group RSS ceiling, 4 GiB system wired-memory ceiling, and process-group cleanup. `DEVSTACK_TEST_SECONDS` changes the wall limit. PHP debugger watchpoint tests are excluded from the automated host run after they caused runaway children and system memory pressure. Do not run two full PHP suites concurrently. Generated application PHP INI disables JIT; JIT regression failures remain unresolved.
+
+Installed runtimes must never read build-machine paths. OpenSSL config/providers/certificates are explicitly supplied through `RuntimeEnvironment`; PHP FPM pools preserve that environment. ImageMagick is patched by `prepare-imagemagick.py` to honor the explicit DevStack configuration-only mode. phpMyAdmin uses an external writable configuration and temp directory through `configure-phpmyadmin.py`. MySQL clients specify no defaults/login paths and installed character-set/plug-in directories. Managed CLI wrappers use the same paths. The corresponding source payload includes both patch scripts.
+
+Preview/release app replacements use staged directories and recoverable previous artifacts. Quit DevStack before installing a replacement; the preview installer refuses to replace a running app. Use `DEVSTACK_BUILD_JOBS=2` for modest build-host resource usage.
