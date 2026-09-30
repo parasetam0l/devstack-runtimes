@@ -7,6 +7,7 @@ if [[ $# -lt 1 ]]; then
 fi
 
 runtime_root="$(cd "$1" && pwd)"
+script_directory="$(cd "$(dirname "$0")" && pwd)"
 shift
 forbidden_roots=("$runtime_root")
 for root in "$@"; do
@@ -16,6 +17,7 @@ library_directories=()
 while IFS= read -r directory; do library_directories+=("$directory"); done < <(/usr/bin/find "$runtime_root" -type f -name '*.dylib' -exec dirname {} \; | /usr/bin/sort -u)
 
 while IFS= read -r -d '' binary; do
+    [[ "$binary" == "$runtime_root"/* ]] || { echo "Relocation target is outside the runtime root: $binary" >&2; exit 65; }
     /usr/bin/file "$binary" | /usr/bin/grep -q 'Mach-O' || continue
     if [[ "$binary" == *.dylib ]]; then
         /usr/bin/install_name_tool -id "@rpath/$(basename "$binary")" "$binary"
@@ -53,6 +55,6 @@ while IFS= read -r -d '' binary; do
         done
     fi
     /usr/bin/codesign --force --sign - --timestamp=none "$binary"
-done < <(/usr/bin/find "$runtime_root" -type f -print0)
+done < <(if [[ -n "${DEVSTACK_RELOCATE_FILE_LIST:-}" ]]; then cat "$DEVSTACK_RELOCATE_FILE_LIST"; else /usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_root"; fi)
 
 echo "Relocated runtime dependencies under $runtime_root"

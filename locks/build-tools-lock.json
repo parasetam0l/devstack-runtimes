@@ -2,6 +2,13 @@
   "schemaVersion": 1,
   "tools": [
     {
+      "id": "cmake-legacy",
+      "version": "3.31.8",
+      "kind": "prebuilt-archive",
+      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-macos-universal.tar.gz",
+      "sha256": "d1449f969c54d5c00886d5b643340d493dfb3c81cb39ee29b35453395c11ebf7"
+    },
+    {
       "id": "cmake",
       "version": "4.4.3",
       "kind": "prebuilt-archive",

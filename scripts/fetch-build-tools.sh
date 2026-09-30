@@ -83,8 +83,8 @@ install_tool() {
             local binary
             binary="$(/usr/bin/find "$work" -type f -name cmake -perm -111 | /usr/bin/head -1)"
             [[ -n "$binary" ]] || { echo "CMake binary missing from $archive" >&2; exit 65; }
-            ln -sf "$binary" "$tools_root/bin/cmake"
-            ln -sf "$(dirname "$binary")/ctest" "$tools_root/bin/ctest"
+            ln -sf "$binary" "$tools_root/bin/$id"
+            ln -sf "$(dirname "$binary")/ctest" "$tools_root/bin/ctest${id#cmake}"
             ;;
         autotools-source)
             cd "$work"

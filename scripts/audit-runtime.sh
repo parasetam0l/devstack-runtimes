@@ -7,6 +7,7 @@ if [[ $# -lt 1 || $# -gt 2 ]]; then
 fi
 
 runtime_directory="$(cd "$1" && pwd)"
+script_directory="$(cd "$(dirname "$0")" && pwd)"
 build_root="${2:-}"
 failures=0
 
@@ -48,7 +49,7 @@ while IFS= read -r -d '' binary; do
             /*) echo "Absolute RPATH in $binary: $rpath" >&2; failures=$((failures + 1)) ;;
         esac
     done < <(/usr/bin/otool -l "$binary" | /usr/bin/awk '/LC_RPATH/{getline; getline; print $2}')
-done < <(/usr/bin/find "$runtime_directory" -type f -print0)
+done < <(/usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_directory")
 
 if [[ $failures -ne 0 ]]; then
     echo "$failures runtime audit failure(s)" >&2

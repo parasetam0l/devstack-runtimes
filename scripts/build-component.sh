@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+recipe_directory="$(cd "$(dirname "$0")" && pwd)"
 
 : "${DEVSTACK_RUNTIME_ID:?}"
 : "${DEVSTACK_SOURCE_DIRECTORY:?}"
@@ -14,12 +15,16 @@ build_directory="$DEVSTACK_BUILD_DIRECTORY"
 prefix="$DEVSTACK_RUNTIME_PREFIX"
 output_root="$DEVSTACK_RUNTIME_OUTPUT"
 dependency_root="$DEVSTACK_DEPENDENCY_ROOT"
-jobs="$(sysctl -n hw.logicalcpu)"
+jobs="${DEVSTACK_BUILD_JOBS:-$(sysctl -n hw.logicalcpu)}"
 export MACOSX_DEPLOYMENT_TARGET=27.0
 export ARCHFLAGS="-arch arm64"
 
 require_tool() {
     command -v "$1" >/dev/null 2>&1 || { echo "Required build tool is missing: $1" >&2; exit 69; }
+}
+
+run_check() {
+    /usr/bin/python3 "$recipe_directory/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" -- "$@"
 }
 
 configure_make_install() {
@@ -40,17 +45,24 @@ build_php_extension() {
     mkdir -p "$extension_work"
     cp -R "$source_directory/." "$extension_work/"
     cd "$extension_work"
+    # PHP 7.4-era extensions use pre-C23 function declarations. Keep their
+    # language mode explicit with newer Apple clang versions.
+    export CFLAGS="-arch arm64 -O2 -std=gnu11 -Wno-incompatible-function-pointer-types"
     "$php_prefix/bin/phpize"
-    PKG_CONFIG_PATH="$output_root/imagemagick-7.1/lib/pkgconfig" ./configure \
-        --with-php-config="$php_prefix/bin/php-config"
+    extension_options=("--with-php-config=$php_prefix/bin/php-config")
+    if [[ "$extension_name" == "imagick" ]]; then
+        extension_options+=("--with-imagick=$output_root/imagemagick-7.1")
+    fi
+    PKG_CONFIG_PATH="$output_root/imagemagick-7.1/lib/pkgconfig" ./configure "${extension_options[@]}"
     make -j "$jobs"
     if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
         echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the $extension_name test suite for this pass." >&2
     else
-        make test TESTS="--show-diff"
+        NO_INTERACTION=1 REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE="$php_prefix/bin/php" run_check make test TESTS="-j1 --show-diff"
     fi
     mkdir -p "$php_prefix/lib/php/extensions"
     cp "modules/$extension_name.so" "$php_prefix/lib/php/extensions/$extension_name.so"
+    /usr/bin/codesign --force --sign - --timestamp=none "$php_prefix/lib/php/extensions/$extension_name.so"
 }
 
 case "$runtime_id" in
@@ -59,13 +71,26 @@ case "$runtime_id" in
         cd "$source_directory"
         ./Configure darwin64-arm64-cc shared --prefix="$prefix" --openssldir="$prefix/ssl" --libdir=lib
         make -j "$jobs"
-        make test
+        run_check make test
         make install_sw install_ssldirs
         ;;
     imagemagick-7.1)
+        /usr/bin/python3 "$recipe_directory/prepare-imagemagick.py" "$source_directory"
+        dependencies="$dependency_root/php-8.5"
+        "${DEVSTACK_REPOSITORY_ROOT:?}/scripts/prepare-build-libraries.sh" "$dependencies"
+        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig"
+        export CPPFLAGS="-I$dependencies/include"
+        export LDFLAGS="-L$dependencies/lib -Wl,-rpath,$dependencies/lib -Wl,-headerpad_max_install_names"
         configure_make_install \
             --prefix="$prefix" --disable-static --enable-shared --without-x \
-            --without-perl --without-opencl --with-modules=no --disable-dependency-tracking
+            --without-perl --without-opencl --with-modules=no --with-png=yes --with-jpeg=yes --with-zlib=yes --disable-dependency-tracking
+        mkdir -p "$prefix/lib"
+        find "$dependencies/lib" -maxdepth 1 \( -name 'libpng*.dylib' -o -name 'libjpeg*.dylib' -o -name 'libz.*.dylib' \) -exec cp -R {} "$prefix/lib/" \;
+        for php_id in php-7.4 php-8.4 php-8.5; do
+            if [[ -d "$output_root/$php_id/lib" ]]; then
+                find "$prefix/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$output_root/$php_id/lib/" \;
+            fi
+        done
         ;;
     apache-2.4)
         openssl_prefix="$output_root/openssl-3.5"
@@ -84,7 +109,7 @@ case "$runtime_id" in
         find "$dependencies/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         find "$openssl_prefix/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
-    php-7.4|php-8.5)
+    php-7.4|php-8.4|php-8.5)
         openssl_prefix="$output_root/openssl-3.5"
         dependencies="$dependency_root/$runtime_id"
         [[ -d "$dependencies/lib/pkgconfig" ]] || {
@@ -120,7 +145,9 @@ case "$runtime_id" in
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
             echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the PHP test suite for this pass." >&2
         else
-            NO_INTERACTION=1 make test TESTS="--show-diff"
+            # macOS 27 phpdbg watchpoint tests left runaway debugger children.
+            # Keep them out of the automated host run until that issue is resolved.
+            NO_INTERACTION=1 REPORT_EXIT_STATUS=1 run_check make test TESTS="-j1 --show-diff ext Zend tests sapi/cli sapi/fpm"
         fi
         mkdir -p "$prefix/lib"
         find "$dependencies/lib" -name '*.dylib' -maxdepth 3 -exec cp -R {} "$prefix/lib/" \;
@@ -129,37 +156,69 @@ case "$runtime_id" in
         ;;
     mysql-5.7|mysql-8.4)
         require_tool cmake
-        # Build-tree tools link @rpath OpenSSL dylibs but carry no rpath of their
-        # own; let the loader fall back to the OpenSSL runtime prefix.
-        export DYLD_FALLBACK_LIBRARY_PATH="$output_root/openssl-3.5/lib:$HOME/lib:/usr/local/lib:/usr/lib"
-        boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
-        if [[ -d "$boost_root" ]]; then
+        cmake_command=cmake
+        ctest_command=ctest
+        mysql_options=("-DDOWNLOAD_BOOST=OFF")
+        if [[ "$runtime_id" == "mysql-5.7" ]]; then
+            require_tool cmake-legacy
+            cmake_command=cmake-legacy
+            ctest_command=ctest-legacy
+            # The locked mysql-boost archive contains the exact 1.59 headers
+            # required by 5.7. CMake 4 needs an explicit legacy policy floor.
+            mysql_options+=("-DWITH_BOOST=$source_directory/boost" "-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
+        else
+            boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
+            [[ -d "$boost_root" ]] || { echo "MySQL 8.4 Boost headers are missing: $boost_root" >&2; exit 66; }
             mkdir -p "$source_directory/extra/boost"
             rm -rf "$source_directory/extra/boost/boost_1_84_0"
             ln -s "$boost_root" "$source_directory/extra/boost/boost_1_84_0"
         fi
         mkdir -p "$build_directory" "$prefix"
         cd "$build_directory"
-        cmake "$source_directory" \
+        "$cmake_command" "$source_directory" \
             -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=Release -DWITH_SSL="$output_root/openssl-3.5" \
             -DWITH_UNIT_TESTS=ON -DWITH_ROUTER=OFF -DWITH_NDB=OFF -DWITH_NDBCLUSTER=OFF \
             -DCMAKE_BUILD_RPATH="$output_root/openssl-3.5/lib" \
-            -DDOWNLOAD_BOOST=OFF
-        cmake --build . --parallel "$jobs"
+            "${mysql_options[@]}"
+        "$cmake_command" --build . --parallel "$jobs"
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
             echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring ctest for this pass." >&2
         else
-            ctest --output-on-failure
+            run_check "$ctest_command" --output-on-failure --parallel 1
         fi
-        cmake --install .
+        "$cmake_command" --install .
+        # Keep the upstream fixtures for verification, outside the shipped payload.
+        if [[ -d "$prefix/mysql-test" ]]; then
+            fixture_parent="$output_root/../runtime-test-fixtures"
+            mkdir -p "$fixture_parent"
+            mv "$prefix/mysql-test" "$fixture_parent/$runtime_id-$(date +%Y%m%d-%H%M%S)"
+        fi
         mkdir -p "$prefix/lib"
         find "$output_root/openssl-3.5/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
+        ;;
+    nginx-1.30)
+        mkdir -p "$prefix"
+        cd "$source_directory"
+        dependencies="$dependency_root/apache-2.4"
+        ./configure --prefix="$prefix" --with-http_ssl_module --with-http_v2_module \
+            --with-cc-opt="-arch arm64 -I$output_root/openssl-3.5/include -I$dependencies/include" \
+            --with-ld-opt="-arch arm64 -Wl,-headerpad_max_install_names -L$output_root/openssl-3.5/lib -L$dependencies/lib -Wl,-rpath,$output_root/openssl-3.5/lib -Wl,-rpath,$dependencies/lib"
+        make -j "$jobs"
+        make install
+        mkdir -p "$prefix/lib"
+        find "$output_root/openssl-3.5/lib" "$dependencies/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        ;;
+    adminer-6.1.1)
+        mkdir -p "$prefix"
+        cp "$source_directory/adminer.php" "$prefix/index.php"
+        "$output_root/php-8.5/bin/php" -n -l "$prefix/index.php"
         ;;
     phpmyadmin-5.2.3)
         rm -rf "$prefix"
         mkdir -p "$prefix"
         cp -R "$source_directory/." "$prefix/"
+        /usr/bin/python3 "$recipe_directory/configure-phpmyadmin.py" "$prefix"
         ;;
     mailpit-1.31.1)
         rm -rf "$prefix"
@@ -187,20 +246,27 @@ case "$runtime_id" in
         chmod 0755 "$wrapper"
         ;;
     xdebug-php74) build_php_extension php-7.4 xdebug ;;
+    xdebug-php84) build_php_extension php-8.4 xdebug ;;
     xdebug-php85) build_php_extension php-8.5 xdebug ;;
     redis-php)
         build_php_extension php-7.4 redis
+        build_php_extension php-8.4 redis
         build_php_extension php-8.5 redis
         ;;
     imagick-php)
         build_php_extension php-7.4 imagick
+        build_php_extension php-8.4 imagick
         build_php_extension php-8.5 imagick
         ;;
     *) echo "No build recipe for $runtime_id" >&2; exit 64 ;;
 esac
 
+# PHP extension recipes install into the owning PHP runtime instead of creating
+# a standalone prefix; those modules are signed at installation above.
+if [[ -d "$prefix" ]]; then
 find "$prefix" -type f \( -perm -0100 -o -name '*.dylib' -o -name '*.so' \) -print0 | while IFS= read -r -d '' binary; do
     if /usr/bin/file "$binary" | /usr/bin/grep -q 'Mach-O'; then
         /usr/bin/codesign --force --sign - --timestamp=none "$binary"
     fi
 done
+fi

@@ -22,7 +22,7 @@ dependency_test_failures=""
 run_check_suite() {
     local component="$1"
     shift
-    if "$@"; then
+    if /usr/bin/python3 "$repository_root/scripts/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" -- "$@"; then
         return
     fi
     if [[ "${DEVSTACK_STRICT_TEST_SUITES:-0}" == "1" ]]; then
@@ -186,12 +186,12 @@ requested="${1:-all}"
 if [[ "$requested" == "all" || "$requested" == "apache" ]]; then build_target apache "$dependency_root/apache-2.4"; fi
 if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     build_target php "$dependency_root/php-8.5"
-    cp -R "$dependency_root/php-8.5" "$dependency_root/php-7.4"
-    # Point the copied pkg-config and config metadata at its own prefix so the
-    # two PHP dependency trees resolve independently.
-    /usr/bin/find "$dependency_root/php-7.4" \( -name '*.pc' -o -name '*.la' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' 's|/php-8.5/|/php-7.4/|g' {} +
+    for php_target in php-7.4 php-8.4; do
+        cp -R "$dependency_root/php-8.5" "$dependency_root/$php_target"
+        /usr/bin/find "$dependency_root/$php_target" \( -name '*.pc' -o -name '*.la' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' "s|/php-8.5/|/$php_target/|g" {} +
+        "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/$php_target"
+    done
     "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/php-8.5"
-    "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/php-7.4"
 fi
 
 if [[ "$requested" == "all" || "$requested" == "mysql" ]]; then
