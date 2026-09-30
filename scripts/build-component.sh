@@ -15,7 +15,7 @@ build_directory="$DEVSTACK_BUILD_DIRECTORY"
 prefix="$DEVSTACK_RUNTIME_PREFIX"
 output_root="$DEVSTACK_RUNTIME_OUTPUT"
 dependency_root="$DEVSTACK_DEPENDENCY_ROOT"
-jobs="${DEVSTACK_BUILD_JOBS:-$(sysctl -n hw.logicalcpu)}"
+jobs="${DEVSTACK_BUILD_JOBS:-2}"
 export MACOSX_DEPLOYMENT_TARGET=27.0
 export ARCHFLAGS="-arch arm64"
 
@@ -153,6 +153,20 @@ case "$runtime_id" in
         find "$dependencies/lib" -name '*.dylib' -maxdepth 3 -exec cp -R {} "$prefix/lib/" \;
         find "$openssl_prefix/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         find "$output_root/imagemagick-7.1/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
+        ;;
+    postgresql-18)
+        openssl_prefix="$output_root/openssl-3.5"
+        dependencies="$dependency_root/php-8.5"
+        export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
+        export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
+        export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -Wl,-rpath,$dependencies/lib -Wl,-rpath,$openssl_prefix/lib -Wl,-headerpad_max_install_names"
+        configure_make_install --prefix="$prefix" --with-ssl=openssl --with-libedit-preferred
+        mkdir -p "$prefix/lib"
+        find "$dependencies/lib" -maxdepth 1 -name 'libicu*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        find "$openssl_prefix/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        # Common PostgreSQL extensions, including pgcrypto and citext.
+        make -C "$build_directory/contrib" -j "$jobs"
+        make -C "$build_directory/contrib" install
         ;;
     mysql-5.7|mysql-8.4)
         require_tool cmake

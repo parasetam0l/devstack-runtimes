@@ -30,7 +30,7 @@ The final release procedure runs all applicable upstream test suites, `DevStackC
 
 ## Current development build and safe verification
 
-The default payload includes Apache, Nginx (disabled by default), PHP 8.4/8.5, MySQL 8.4, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
+The default payload includes Apache, Nginx (disabled by default), PHP 8.4/8.5, MySQL 8.4, PostgreSQL 18.6, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
 
 The successful local artifact is ad-hoc signed; packaging success is not full upstream acceptance or notarized distribution readiness. The morning evidence and unresolved failures are recorded in `Documentation/HANDOVER.md`.
 
@@ -39,3 +39,13 @@ Upstream recipes now use `run-bounded-check.py`: checks run serially with a defa
 Installed runtimes must never read build-machine paths. OpenSSL config/providers/certificates are explicitly supplied through `RuntimeEnvironment`; PHP FPM pools preserve that environment. ImageMagick is patched by `prepare-imagemagick.py` to honor the explicit DevStack configuration-only mode. phpMyAdmin uses an external writable configuration and temp directory through `configure-phpmyadmin.py`. MySQL clients specify no defaults/login paths and installed character-set/plug-in directories. Managed CLI wrappers use the same paths. The corresponding source payload includes both patch scripts.
 
 Preview/release app replacements use staged directories and recoverable previous artifacts. Quit DevStack before installing a replacement; the preview installer refuses to replace a running app. Use `DEVSTACK_BUILD_JOBS=2` for modest build-host resource usage.
+
+## PostgreSQL and PHP drivers
+
+Build `postgresql-18` with `DEVSTACK_BUILD_JOBS=2 scripts/build-runtimes.sh postgresql-18`. The recipe uses the existing OpenSSL and ICU dependency prefixes, includes libedit support, and installs contrib extensions such as pgcrypto and citext. Then run `DEVSTACK_BUILD_JOBS=2 scripts/build-postgresql-extensions.sh` to build ABI-specific pgsql and pdo_pgsql modules from the already verified PHP 8.4/8.5 source trees. libpq is copied into each PHP runtime; relocation and runtime auditing follow. The full Adminer English build replaces the MySQL-only build.
+
+PostgreSQL initializes a private cluster under Application Support/DevStack/Databases/postgresql-18. It binds only 127.0.0.1:5432, uses SCRAM authentication for TCP and sockets, and supports TLS using postgresql.localhost's managed certificate. Explicit shared-data, library, configuration, and client credential paths keep the shipped runtime independent of its build prefix.
+
+SQL exports use pg_dumpall with clean/if-exists and exclude template1 and role password hashes. The managed devstack role is preserved, so restores can complete without dropping the login executing them; other roles and databases are restored by upstream SQL. Imports run through psql with ON_ERROR_STOP and are preceded by an automatic backup. SQL files can still fail when they require unavailable extensions, different privileges, or dropping databases with active external connections.
+
+Service shutdown uses bounded process-identity polling and PostgreSQL's fast shutdown signal. There is no unbounded Foundation process wait in service shutdown or command execution. Recovery tools can stop only recorded, verified DevStack-owned processes using DevStackRuntimeChecks --stop-owned-services.

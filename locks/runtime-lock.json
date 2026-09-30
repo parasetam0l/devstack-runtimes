@@ -490,6 +490,16 @@
           "version": "3.8.1",
           "enabledByDefault": true,
           "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
         }
       ],
       "hashes": {},
@@ -503,7 +513,8 @@
       "dependencyPaths": [
         "@rpath/libssl.3.dylib",
         "@rpath/libcrypto.3.dylib",
-        "@rpath/libMagickWand-7.Q16HDRI.10.dylib"
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
       ],
       "build": {
         "buildSystem": "configure/make",
@@ -1081,6 +1092,16 @@
           "version": "3.8.1",
           "enabledByDefault": true,
           "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
         }
       ],
       "hashes": {},
@@ -1094,7 +1115,8 @@
       "dependencyPaths": [
         "@rpath/libssl.3.dylib",
         "@rpath/libcrypto.3.dylib",
-        "@rpath/libMagickWand-7.Q16HDRI.10.dylib"
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
       ],
       "build": {
         "buildSystem": "configure/make",
@@ -1234,8 +1256,8 @@
       "hashes": {},
       "license": "Apache-2.0 OR GPL-2.0-only",
       "source": {
-        "url": "https://github.com/vrana/adminer/releases/download/v6.1.1/adminer-6.1.1-mysql-en.php",
-        "sha256": "cd5d65d3e85c9e1233126625232150e2de405f3d56c76fdc171f4133a401e8d2",
+        "url": "https://github.com/vrana/adminer/releases/download/v6.1.1/adminer-6.1.1-en.php",
+        "sha256": "d2cbf80da00f7630304477b4a09f1bd2212bc6c4a53c71df1520a8afce3dc865",
         "patches": []
       },
       "supportState": "supported",
@@ -1248,6 +1270,46 @@
         "environment": {},
         "dependencies": [
           "php-8.5"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "postgresql-18",
+      "kind": "postgresql",
+      "version": "18.6",
+      "architecture": "arm64",
+      "minimumMacOS": "27.0",
+      "entryPoints": {
+        "server": "bin/postgres",
+        "initdb": "bin/initdb",
+        "client": "bin/psql",
+        "dump": "bin/pg_dump",
+        "dumpAll": "bin/pg_dumpall",
+        "restore": "bin/pg_restore",
+        "ready": "bin/pg_isready"
+      },
+      "extensions": [],
+      "hashes": {},
+      "license": "PostgreSQL",
+      "source": {
+        "url": "https://ftp.postgresql.org/pub/source/v18.6/postgresql-18.6.tar.bz2",
+        "sha256": "555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [
+        "openssl-3.5"
+      ],
+      "build": {
+        "buildSystem": "autoconf-make",
+        "flags": [
+          "--with-ssl=openssl",
+          "--with-libedit-preferred"
+        ],
+        "environment": {},
+        "dependencies": [
+          "openssl-3.5"
         ],
         "patchSources": []
       }
