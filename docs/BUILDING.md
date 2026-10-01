@@ -32,7 +32,7 @@ The final release procedure runs all applicable upstream test suites, `DevStackC
 
 The default payload includes Apache, Nginx (disabled by default), PHP 8.4/8.5, MySQL 8.4, PostgreSQL 18.6, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
 
-The successful local artifact is ad-hoc signed; packaging success is not full upstream acceptance or notarized distribution readiness. The morning evidence and unresolved failures are recorded in `Documentation/HANDOVER.md`.
+Packaging success is not full upstream acceptance: the release pipeline signs, notarizes and staples the image, while upstream suites and clean-machine acceptance remain separate work. Keep the packaging log as evidence; `.build/logs/package-latest.log` records the last run.
 
 Upstream recipes now use `run-bounded-check.py`: checks run serially with a default 1,200-second wall limit, a per-process CPU limit, 1 GiB group RSS ceiling, 4 GiB system wired-memory ceiling, and process-group cleanup. `DEVSTACK_TEST_SECONDS` changes the wall limit. PHP debugger watchpoint tests are excluded from the automated host run after they caused runaway children and system memory pressure. Do not run two full PHP suites concurrently. Generated application PHP INI disables JIT; JIT regression failures remain unresolved.
 
