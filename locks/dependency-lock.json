@@ -151,6 +151,26 @@
       "targets": [
         "php"
       ]
+    },
+    {
+      "id": "freetype",
+      "version": "2.13.3",
+      "url": "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.xz",
+      "sha256": "0550350666d427c74daeb85d5ac7bb353acba5f76956395995311a9c6f063289",
+      "license": "FTL",
+      "targets": [
+        "php"
+      ]
+    },
+    {
+      "id": "libwebp",
+      "version": "1.4.0",
+      "url": "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0.tar.gz",
+      "sha256": "61f873ec69e3be1b99535634340d5bde750b2e4447caa1db9f61be3fd49ab1e5",
+      "license": "BSD-3-Clause",
+      "targets": [
+        "php"
+      ]
     }
   ]
 }

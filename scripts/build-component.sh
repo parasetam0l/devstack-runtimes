@@ -83,9 +83,11 @@ case "$runtime_id" in
         export LDFLAGS="-L$dependencies/lib -Wl,-rpath,$dependencies/lib -Wl,-headerpad_max_install_names"
         configure_make_install \
             --prefix="$prefix" --disable-static --enable-shared --without-x \
-            --without-perl --without-opencl --with-modules=no --with-png=yes --with-jpeg=yes --with-zlib=yes --disable-dependency-tracking
+            --without-perl --without-opencl --with-modules=no --with-png=yes --with-jpeg=yes --with-zlib=yes \
+            --with-webp=yes --with-freetype=yes --disable-dependency-tracking
         mkdir -p "$prefix/lib"
-        find "$dependencies/lib" -maxdepth 1 \( -name 'libpng*.dylib' -o -name 'libjpeg*.dylib' -o -name 'libz.*.dylib' \) -exec cp -R {} "$prefix/lib/" \;
+        find "$dependencies/lib" -maxdepth 1 \( -name 'libpng*.dylib' -o -name 'libjpeg*.dylib' -o -name 'libz.*.dylib' \
+            -o -name 'libwebp*.dylib' -o -name 'libsharpyuv*.dylib' -o -name 'libfreetype*.dylib' \) -exec cp -R {} "$prefix/lib/" \;
         for php_id in php-7.4 php-8.4 php-8.5; do
             if [[ -d "$output_root/$php_id/lib" ]]; then
                 find "$prefix/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$output_root/$php_id/lib/" \;
@@ -132,7 +134,7 @@ case "$runtime_id" in
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
             --enable-soap --enable-sockets --with-bz2="$dependencies" --with-curl --with-fpm-user="$USER" \
-            --with-fpm-group=staff --enable-gd --with-jpeg --with-gettext="$dependencies" --with-gmp \
+            --with-fpm-group=staff --enable-gd --with-jpeg --with-freetype --with-webp --with-gettext="$dependencies" --with-gmp \
             --with-iconv="$dependencies" --with-zlib \
             --with-mysqli=mysqlnd --with-openssl="$openssl_prefix" --with-pdo-mysql=mysqlnd \
             --with-pdo-sqlite --with-sodium --with-sqlite3 --with-tidy="$dependencies" --with-xsl --with-zip

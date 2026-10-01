@@ -114,12 +114,13 @@ items = {
     "libxml-2.0": ("libxml2", libxml_version, "-lxml2", f"-I{sdk}/usr/include/libxml2"),
     "libxslt": ("libxslt", libxslt_version, "-lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
     "libexslt": ("libexslt", libxslt_version, "-lexslt -lxslt -lxml2", f"-I{sdk}/usr/include/libxml2"),
-    "libcurl": ("libcurl", libcurl_version, "-lcurl", f"-I{sdk}/usr/include"),
-    "sqlite3": ("sqlite3", sqlite_version, "-lsqlite3", f"-I{sdk}/usr/include"),
+    "libcurl": ("libcurl", libcurl_version, "-lcurl", ""),
+    "sqlite3": ("sqlite3", sqlite_version, "-lsqlite3", ""),
 }
 for filename, (name, version, libs, cflags) in items.items():
+    cflags_line = f"Cflags: {cflags}\n" if cflags else ""
     (pc / f"{filename}.pc").write_text(
-        f"prefix=/usr\nName: {name}\nDescription: {name} system library\nVersion: {version}\nLibs: {libs}\nCflags: {cflags}\n",
+        f"prefix=/usr\nName: {name}\nDescription: {name} system library\nVersion: {version}\nLibs: {libs}\n{cflags_line}",
         encoding="utf-8",
     )
 PY
@@ -173,6 +174,8 @@ build_target() {
             oniguruma) build_autotools "$source" "$prefix" ;;
             libzip) build_cmake "$source" "$prefix" -DBUILD_TOOLS=OFF -DBUILD_REGRESS=ON -DBUILD_EXAMPLES=OFF ;;
             libjpeg-turbo) build_cmake "$source" "$prefix" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=OFF ;;
+            freetype) build_autotools "$source" "$prefix" --with-zlib=no --with-bzip2=no --with-png=no --with-harfbuzz=no --with-brotli=no ;;
+            libwebp) build_cmake "$source" "$prefix" -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF ;;
             libsodium) build_autotools "$source" "$prefix" ;;
             gmp) build_autotools "$source" "$prefix" --enable-cxx ;;
             tidy) build_cmake "$source" "$prefix" -DSUPPORT_CONSOLE_APP=OFF ;;
