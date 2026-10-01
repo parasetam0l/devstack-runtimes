@@ -59,11 +59,11 @@ START TRANSACTION;
 INSERT INTO records VALUES (3, 'rolled-back');
 ROLLBACK;
 SQL
-before="$("$mysql" --batch --skip-column-names --no-defaults --protocol=tcp --host=127.0.0.1 --port="$port" --user=root --execute="SELECT COUNT(*), SHA2(GROUP_CONCAT(CONCAT(id, ':', value) ORDER BY id), 256) FROM gate.records")"
+before="$("$mysql" --no-defaults --batch --skip-column-names --protocol=tcp --host=127.0.0.1 --port="$port" --user=root --execute="SELECT COUNT(*), SHA2(GROUP_CONCAT(CONCAT(id, ':', value) ORDER BY id), 256) FROM gate.records")"
 [[ "$before" == 2$'\t'* ]] || { echo "MySQL CRUD/transaction check failed: $before" >&2; exit 65; }
 stop_server
 start_server
-after="$("$mysql" --batch --skip-column-names --no-defaults --protocol=tcp --host=127.0.0.1 --port="$port" --user=root --execute="SELECT COUNT(*), SHA2(GROUP_CONCAT(CONCAT(id, ':', value) ORDER BY id), 256) FROM gate.records")"
+after="$("$mysql" --no-defaults --batch --skip-column-names --protocol=tcp --host=127.0.0.1 --port="$port" --user=root --execute="SELECT COUNT(*), SHA2(GROUP_CONCAT(CONCAT(id, ':', value) ORDER BY id), 256) FROM gate.records")"
 [[ "$after" == "$before" ]] || { echo "MySQL restart integrity mismatch" >&2; exit 65; }
 "$mysql" --no-defaults --protocol=tcp --host=127.0.0.1 --port="$port" --user=root --execute="CHECK TABLE gate.records EXTENDED" | /usr/bin/grep -q 'OK'
 stop_server

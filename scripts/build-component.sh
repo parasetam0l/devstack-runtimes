@@ -180,6 +180,16 @@ case "$runtime_id" in
             # The locked mysql-boost archive contains the exact 1.59 headers
             # required by 5.7. CMake 4 needs an explicit legacy policy floor.
             mysql_options+=("-DWITH_BOOST=$source_directory/boost" "-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
+            # zlib 1.2.13 defines an fdopen macro that breaks the modern macOS
+            # SDK headers; macOS always has fdopen.
+            /usr/bin/sed -i '' 's/^#      ifndef fdopen$/#      if !defined(__APPLE__) \&\& !defined(fdopen)/' \
+                "$source_directory/extra/zlib/zlib-1.2.13/zutil.h"
+            # Boost 1.59's MPL casts out-of-range integers to enums in eagerly
+            # instantiated typedefs; modern clang rejects that in constant
+            # expressions. Upstream fix (boostorg/mpl#77): instantiate the
+            # casts lazily as static members.
+            /usr/bin/sed -i '' 's/^#if BOOST_WORKAROUND(__EDG_VERSION__, <= 243)$/#if BOOST_WORKAROUND(__EDG_VERSION__, <= 243) || __cplusplus >= 201103L/' \
+                "$source_directory/boost/boost_1_59_0/boost/mpl/aux_/integral_wrapper.hpp"
         else
             boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
             [[ -d "$boost_root" ]] || { echo "MySQL 8.4 Boost headers are missing: $boost_root" >&2; exit 66; }
