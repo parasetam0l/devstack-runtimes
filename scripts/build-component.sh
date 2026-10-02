@@ -227,7 +227,9 @@ case "$runtime_id" in
         mkdir -p "$prefix"
         cd "$source_directory"
         dependencies="$dependency_root/apache-2.4"
-        ./configure --prefix="$prefix" --with-http_ssl_module --with-http_v2_module \
+        # --with-http_realip_module is required for the PROXY protocol
+        # connections the helper sends to the web server.
+        ./configure --prefix="$prefix" --with-http_ssl_module --with-http_v2_module --with-http_realip_module \
             --with-cc-opt="-arch arm64 -I$output_root/openssl-3.5/include -I$dependencies/include" \
             --with-ld-opt="-arch arm64 -Wl,-headerpad_max_install_names -L$output_root/openssl-3.5/lib -L$dependencies/lib -Wl,-rpath,$output_root/openssl-3.5/lib -Wl,-rpath,$dependencies/lib"
         make -j "$jobs"
