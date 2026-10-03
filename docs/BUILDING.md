@@ -4,12 +4,12 @@ DevStack never builds or downloads software on an installed Mac. These scripts r
 
 The source of truth is `Sources/DevStackApp/Resources/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
 
-Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` selects the modern payload, rebuilds the SBOM from the final payload, signs the app, helper, and DMG, and notarizes and staples when `DEVSTACK_NOTARY_PROFILE` is set. Legacy payloads are considered only with `DEVSTACK_INCLUDE_LEGACY=1` and passing feasibility gates. Failed gates never remove staged payloads.
+Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` selects the modern payload, checks that every shipped component has licence notices and a verified source archive, signs the nested code, rebuilds the SBOM from the signed payload, signs the helper and app, and, when `DEVSTACK_NOTARY_PROFILE` is set, notarizes and staples the app before building the DMG, then notarizes and staples the DMG. Legacy payloads are considered only with `DEVSTACK_INCLUDE_LEGACY=1` and passing feasibility gates. Failed gates never remove staged payloads.
 
 ## Required build host
 
 - Apple Silicon running macOS 27 with full Xcode selected by `xcode-select`.
-- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf, Bison) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. Put `.build/build-tools/bin` first on `PATH` before running the other scripts.
+- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf, Bison) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. The build scripts set their own `PATH` to these tools plus the system directories, so tools from a package manager never leak into a build.
 - An Apple Developer ID Application identity and notarization keychain profile for a distributable image.
 
 No Homebrew or MacPorts prefix is accepted by the audit, even on the release machine.
