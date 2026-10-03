@@ -6,10 +6,16 @@ runtime_cache="${DEVSTACK_SOURCE_CACHE:-$repository_root/.build/runtime-cache}"
 dependency_cache="$runtime_cache/dependencies"
 mkdir -p "$runtime_cache" "$dependency_cache"
 
+# Lock listings are captured first: a failing lock reader inside process
+# substitution would go unnoticed and "verify" nothing.
+runtime_ids="$("$repository_root/scripts/runtime-lock.py" list)"
+dependency_sources="$({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; "$repository_root/scripts/dependency-lock.py" mysql; } | /usr/bin/sort -u)"
+[[ -n "$runtime_ids" && -n "$dependency_sources" ]] || { echo "The source locks list nothing to verify." >&2; exit 65; }
+
 while IFS= read -r runtime_id; do
     "$repository_root/scripts/fetch-runtime.sh" "$runtime_id" "$runtime_cache" >/dev/null
     echo "verified runtime source: $runtime_id"
-done < <("$repository_root/scripts/runtime-lock.py" list)
+done <<< "$runtime_ids"
 
 while IFS=$'\t' read -r id version url sha256; do
     filename="${url%%\?*}"
@@ -28,7 +34,7 @@ while IFS=$'\t' read -r id version url sha256; do
     fi
     mv "$destination.partial" "$destination"
     echo "verified dependency source: $id $version"
-done < <({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; "$repository_root/scripts/dependency-lock.py" mysql; } | /usr/bin/sort -u)
+done <<< "$dependency_sources"
 
 DEVSTACK_BUILD_TOOLS_VERIFY_ONLY=1 "$repository_root/scripts/fetch-build-tools.sh"
 

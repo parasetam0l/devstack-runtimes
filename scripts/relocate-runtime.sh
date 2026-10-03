@@ -22,12 +22,20 @@ while IFS= read -r directory; do library_directories+=("$directory"); done < <(/
 # names (for example libtidy.58.dylib -> libtidy.5.8.0.dylib) so references
 # can be normalized.
 symlink_names_directory="$(/usr/bin/mktemp -d)"
-trap '/bin/rm -rf "$symlink_names_directory"' EXIT
+binary_list="$(/usr/bin/mktemp)"
+trap '/bin/rm -rf "$symlink_names_directory" "$binary_list"' EXIT
 while IFS= read -r -d '' link; do
     leaf="$(basename "$link")"
     real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.basename(os.path.realpath(sys.argv[1])))' "$link")"
     [[ "$leaf" == "$real" ]] || printf '%s' "$real" > "$symlink_names_directory/$leaf"
 done < <(/usr/bin/find "$runtime_root" -type l -name '*.dylib' -print0)
+
+# Listed into a file first so a failing lister stops the relocation.
+if [[ -n "${DEVSTACK_RELOCATE_FILE_LIST:-}" ]]; then
+    cat "$DEVSTACK_RELOCATE_FILE_LIST" > "$binary_list"
+else
+    /usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_root" > "$binary_list"
+fi
 
 while IFS= read -r -d '' binary; do
     [[ "$binary" == "$runtime_root"/* ]] || { echo "Relocation target is outside the runtime root: $binary" >&2; exit 65; }
@@ -81,6 +89,6 @@ while IFS= read -r -d '' binary; do
         done
     fi
     /usr/bin/codesign --force --sign - --timestamp=none "$binary"
-done < <(if [[ -n "${DEVSTACK_RELOCATE_FILE_LIST:-}" ]]; then cat "$DEVSTACK_RELOCATE_FILE_LIST"; else /usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_root"; fi)
+done < "$binary_list"
 
 echo "Relocated runtime dependencies under $runtime_root"

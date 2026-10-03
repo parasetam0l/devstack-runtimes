@@ -5,7 +5,7 @@ repository_root="$(cd "$(dirname "$0")/.." && pwd)"
 cache_root="${DEVSTACK_SOURCE_CACHE:-$repository_root/.build/runtime-cache}/dependencies"
 work_root="${DEVSTACK_BUILD_ROOT:-$repository_root/.build/runtime-work}/dependencies"
 dependency_root="${DEVSTACK_DEPENDENCY_ROOT:-$repository_root/.build/runtime-dependencies}"
-jobs="$(sysctl -n hw.logicalcpu)"
+jobs="${DEVSTACK_BUILD_JOBS:-$(sysctl -n hw.logicalcpu)}"
 sdk="$(xcrun --show-sdk-path)"
 export MACOSX_DEPLOYMENT_TARGET=27.0
 export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
@@ -157,6 +157,9 @@ build_target() {
     rm -rf "$prefix"
     mkdir -p "$prefix"
     create_system_pc_files "$prefix"
+    local recipes
+    recipes="$("$repository_root/scripts/dependency-lock.py" "$target")"
+    [[ -n "$recipes" ]] || { echo "The dependency lock lists nothing for $target." >&2; exit 65; }
     while IFS=$'\t' read -r id version url sha256; do
         source="$work_root/$target-$id"
         fetch_and_extract "$id" "$version" "$url" "$sha256" "$source"
@@ -182,7 +185,7 @@ build_target() {
             gettext) build_gettext "$source" "$prefix" ;;
             *) echo "No dependency recipe for $id" >&2; exit 64 ;;
         esac
-    done < <("$repository_root/scripts/dependency-lock.py" "$target")
+    done <<< "$recipes"
 }
 
 requested="${1:-all}"
@@ -190,8 +193,13 @@ if [[ "$requested" == "all" || "$requested" == "apache" ]]; then build_target ap
 if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     build_target php "$dependency_root/php-8.5"
     for php_target in php-7.4 php-8.4; do
+        # Replace the copy: copying onto an existing tree would nest php-8.5
+        # inside it and leave the previous build's files in place.
+        rm -rf "$dependency_root/$php_target"
         cp -R "$dependency_root/php-8.5" "$dependency_root/$php_target"
-        /usr/bin/find "$dependency_root/$php_target" \( -name '*.pc' -o -name '*.la' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' "s|/php-8.5/|/$php_target/|g" {} +
+        # Rewrite the whole prefix so prefix= lines without a trailing slash
+        # move too.
+        /usr/bin/find "$dependency_root/$php_target" \( -name '*.pc' -o -name '*.la' -o -name '*-config' \) -type f -exec /usr/bin/sed -i '' "s|$dependency_root/php-8.5|$dependency_root/$php_target|g" {} +
         "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/$php_target"
     done
     "$repository_root/scripts/prepare-build-libraries.sh" "$dependency_root/php-8.5"
@@ -202,9 +210,11 @@ if [[ "$requested" == "all" || "$requested" == "mysql" ]]; then
     # source tree; the upstream MySQL tarball does not bundle it.
     boost_root="$dependency_root/mysql-8.4/boost/boost_1_84_0"
     rm -rf "$dependency_root/mysql-8.4"
+    mysql_sources="$("$repository_root/scripts/dependency-lock.py" mysql)"
+    [[ -n "$mysql_sources" ]] || { echo "The dependency lock lists nothing for mysql." >&2; exit 65; }
     while IFS=$'\t' read -r id version url sha256; do
         fetch_and_extract "$id" "$version" "$url" "$sha256" "$boost_root"
-    done < <("$repository_root/scripts/dependency-lock.py" mysql)
+    done <<< "$mysql_sources"
 fi
 
 if [[ -n "$dependency_test_failures" ]]; then

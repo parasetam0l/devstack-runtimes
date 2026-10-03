@@ -16,12 +16,18 @@ failures=0
 # real basename as the install name, and dyld rejects a found dylib whose
 # install name leaf differs from the requested one.
 symlink_names_directory="$(/usr/bin/mktemp -d)"
-trap '/bin/rm -rf "$symlink_names_directory"' EXIT
+binary_list="$(/usr/bin/mktemp)"
+trap '/bin/rm -rf "$symlink_names_directory" "$binary_list"' EXIT
 while IFS= read -r -d '' link; do
     leaf="$(basename "$link")"
     real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.basename(os.path.realpath(sys.argv[1])))' "$link")"
     [[ "$leaf" == "$real" ]] || printf '%s' "$real" > "$symlink_names_directory/$leaf"
 done < <(/usr/bin/find "$runtime_directory" -type l -name '*.dylib' -print0)
+
+# Listed into a file first: macOS bash cannot observe a failure inside process
+# substitution, so a crashing lister would make the audit pass on nothing.
+/usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_directory" > "$binary_list"
+[[ -s "$binary_list" ]] || { echo "No Mach-O files found under $runtime_directory" >&2; exit 65; }
 
 while IFS= read -r -d '' binary; do
     if ! /usr/bin/file "$binary" | /usr/bin/grep -q 'Mach-O'; then
@@ -73,7 +79,7 @@ while IFS= read -r -d '' binary; do
             /*) echo "Absolute RPATH in $binary: $rpath" >&2; failures=$((failures + 1)) ;;
         esac
     done < <(/usr/bin/otool -l "$binary" | /usr/bin/awk '/LC_RPATH/{getline; getline; print $2}')
-done < <(/usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_directory")
+done < "$binary_list"
 
 if [[ $failures -ne 0 ]]; then
     echo "$failures runtime audit failure(s)" >&2
