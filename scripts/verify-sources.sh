@@ -9,6 +9,7 @@ mkdir -p "$runtime_cache" "$dependency_cache"
 # Lock listings are captured first: a failing lock reader inside process
 # substitution would go unnoticed and "verify" nothing.
 runtime_ids="$("$repository_root/scripts/runtime-lock.py" list)"
+runtime_patches="$("$repository_root/scripts/runtime-lock.py" patches)"
 dependency_sources="$({ "$repository_root/scripts/dependency-lock.py" apache; "$repository_root/scripts/dependency-lock.py" php; "$repository_root/scripts/dependency-lock.py" mysql; } | /usr/bin/sort -u)"
 [[ -n "$runtime_ids" && -n "$dependency_sources" ]] || { echo "The source locks list nothing to verify." >&2; exit 65; }
 
@@ -16,6 +17,12 @@ while IFS= read -r runtime_id; do
     "$repository_root/scripts/fetch-runtime.sh" "$runtime_id" "$runtime_cache" >/dev/null
     echo "verified runtime source: $runtime_id"
 done <<< "$runtime_ids"
+
+while IFS=$'\t' read -r runtime_id patch_index; do
+    [[ -n "$runtime_id" ]] || continue
+    "$repository_root/scripts/fetch-runtime.sh" "$runtime_id" "$runtime_cache" "$patch_index" >/dev/null
+    echo "verified runtime patch: $runtime_id #$patch_index"
+done <<< "$runtime_patches"
 
 while IFS=$'\t' read -r id version url sha256; do
     filename="${url%%\?*}"

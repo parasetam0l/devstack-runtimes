@@ -60,13 +60,8 @@ for runtime_id in "${requested[@]}"; do
     esac
 
     if [[ "$runtime_id" == "php-7.4" ]]; then
-        patch_url="$($repository_root/scripts/runtime-lock.py patch php-7.4 0 url)"
-        patch_sha="$($repository_root/scripts/runtime-lock.py patch php-7.4 0 sha256)"
-        patch_file="$cache_directory/php-7.4-openssl3.patch"
-        /usr/bin/curl --fail --location --proto '=https' --tlsv1.2 --output "$patch_file.partial" "$patch_url"
-        actual_patch_sha="$(/usr/bin/shasum -a 256 "$patch_file.partial" | /usr/bin/awk '{print $1}')"
-        [[ "$actual_patch_sha" == "$patch_sha" ]] || { rm -f "$patch_file.partial"; echo "PHP 7.4 patch checksum mismatch" >&2; exit 65; }
-        mv "$patch_file.partial" "$patch_file"
+        # Cached and SHA-256 checked like the source archive.
+        patch_file="$("$repository_root/scripts/fetch-runtime.sh" php-7.4 "$cache_directory" 0)"
         /usr/bin/patch -d "$component_work/source" -p1 < "$patch_file"
     fi
 
@@ -85,5 +80,5 @@ if [[ "$build_everything" == "1" ]]; then "$repository_root/scripts/build-postgr
 "$repository_root/scripts/relocate-runtime.sh" "$output_root" "$work_root" "$dependency_root"
 "$repository_root/scripts/audit-runtime.sh" "$output_root" "$work_root"
 "$repository_root/scripts/generate-sbom.py" "$output_root" "$repository_root/SBOM/runtime-sbom.cdx.json"
-"$repository_root/scripts/collect-licenses.sh" "$work_root" "$repository_root/ThirdPartyNotices"
+"$repository_root/scripts/collect-licenses.py" notices "$repository_root/ThirdPartyNotices"
 echo "Runtime output: $output_root"

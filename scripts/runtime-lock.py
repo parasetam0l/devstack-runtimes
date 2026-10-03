@@ -11,10 +11,15 @@ LOCK = pathlib.Path(__file__).resolve().parents[1] / "Sources/DevStackApp/Resour
 def main() -> None:
     data = json.loads(LOCK.read_text(encoding="utf-8"))
     if len(sys.argv) < 2:
-        raise SystemExit("usage: runtime-lock.py list | get ID FIELD | patch ID INDEX FIELD")
+        raise SystemExit("usage: runtime-lock.py list | patches | get ID FIELD | patch ID INDEX FIELD")
     command = sys.argv[1]
     if command == "list":
         print("\n".join(item["id"] for item in data["runtimes"]))
+        return
+    if command == "patches":
+        for item in data["runtimes"]:
+            for index, _ in enumerate((item.get("build") or {}).get("patchSources", [])):
+                print(f"{item['id']}\t{index}")
         return
     if command == "get" and len(sys.argv) == 4:
         item = next((item for item in data["runtimes"] if item["id"] == sys.argv[2]), None)
