@@ -5,6 +5,10 @@ repository_root="$(cd "$(dirname "$0")/.." && pwd)"
 cache_root="${DEVSTACK_SOURCE_CACHE:-$repository_root/.build/runtime-cache}/dependencies"
 work_root="${DEVSTACK_BUILD_ROOT:-$repository_root/.build/runtime-work}/dependencies"
 dependency_root="${DEVSTACK_DEPENDENCY_ROOT:-$repository_root/.build/runtime-dependencies}"
+# Build with the pinned tools and the system only. A package manager's tools
+# earlier on PATH leak in otherwise; Homebrew's GNU ar, for example, writes
+# archives that Apple's linker rejects.
+export PATH="${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 jobs="${DEVSTACK_BUILD_JOBS:-$(sysctl -n hw.logicalcpu)}"
 sdk="$(xcrun --show-sdk-path)"
 export MACOSX_DEPLOYMENT_TARGET=27.0

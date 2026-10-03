@@ -4,7 +4,8 @@ repository_root="$(cd "$(dirname "$0")/.." && pwd)"
 output_root="${DEVSTACK_RUNTIME_OUTPUT:-$repository_root/.build/Runtimes}"
 work_root="${DEVSTACK_BUILD_ROOT:-$repository_root/.build/runtime-work}"
 pg_prefix="$output_root/postgresql-18"
-export PATH="$pg_prefix/bin:$repository_root/.build/build-tools/bin:$PATH"
+# Pinned tools and the system only; see build-runtimes.sh.
+export PATH="$pg_prefix/bin:${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export MACOSX_DEPLOYMENT_TARGET=27.0
 export CFLAGS="-arch arm64 -O2 -std=gnu11"
 export CPPFLAGS="-I$pg_prefix/include"

@@ -6,6 +6,10 @@ cache_directory="${DEVSTACK_SOURCE_CACHE:-$repository_root/.build/runtime-cache}
 work_root="${DEVSTACK_BUILD_ROOT:-$repository_root/.build/runtime-work}"
 output_root="${DEVSTACK_RUNTIME_OUTPUT:-$repository_root/.build/Runtimes}"
 dependency_root="${DEVSTACK_DEPENDENCY_ROOT:-$repository_root/.build/runtime-dependencies}"
+# Build with the pinned tools and the system only. A package manager's tools
+# earlier on PATH leak in otherwise; Homebrew's GNU ar, for example, writes
+# archives that Apple's linker rejects.
+export PATH="${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "arm64" ]]; then
     echo "DevStack runtimes must be built natively on Apple Silicon macOS." >&2
