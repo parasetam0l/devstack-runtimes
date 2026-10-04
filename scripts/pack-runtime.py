@@ -34,19 +34,32 @@ import tempfile
 REPOSITORY = pathlib.Path(__file__).resolve().parents[1]
 RUNTIME_LOCK = json.loads((REPOSITORY / "locks/runtime-lock.json").read_text(encoding="utf-8"))["runtimes"]
 
-# Which shared dependency tree each recipe links and copies into its runtime
-# (see build-component.sh); its libraries' notices and sources travel with
-# the pack.
-DEPENDENCY_TARGETS = {
-    "apache-2.4": {"apache"},
-    "nginx-1.30": {"apache"},
-    "php-7.4": {"php"},
-    "php-8.4": {"php"},
-    "php-8.5": {"php"},
-    "imagemagick-7.1": {"php"},
-    "postgresql-18": {"postgresql-18"},
-    "mysql-8.4": {"mysql"},
+# The shared libraries a pack can carry, by the component that provides them.
+# A component is part of a pack exactly when its libraries are in the
+# payload, so the SBOM, the notices and the sources follow what ships.
+LIBRARY_PREFIXES = {
+    "openssl-3.5": ("libssl.", "libcrypto."),
+    "imagemagick-7.1": ("libMagickCore-", "libMagickWand-", "libMagick++-"),
+    "postgresql-18": ("libpq.",),
+    "apr": ("libapr-1.",),
+    "apr-util": ("libaprutil-1.",),
+    "pcre2": ("libpcre2-",),
+    "nghttp2": ("libnghttp2.",),
+    "zlib": ("libz.",),
+    "libpng": ("libpng",),
+    "icu": ("libicu",),
+    "oniguruma": ("libonig.",),
+    "libzip": ("libzip.",),
+    "libsodium": ("libsodium.",),
+    "gmp": ("libgmp.", "libgmpxx."),
+    "tidy": ("libtidy.",),
+    "gettext": ("libintl.", "libasprintf."),
+    "libjpeg-turbo": ("libjpeg.",),
+    "freetype": ("libfreetype.",),
+    "libwebp": ("libwebp", "libsharpyuv."),
 }
+# Compiled in rather than carried as a library.
+BUILT_IN = {"mysql-8.4": {"boost"}}
 
 
 def load_collector():
@@ -69,33 +82,26 @@ def pack_name(item):
     return f"{base}-r{item['packRevision']}"
 
 
-def contents(item, collector):
-    """The runtime, its PHP extensions, the runtimes whose libraries are copied
-    into it, and the shared libraries it links: everything it carries."""
-    by_id = {entry["id"]: entry for entry in RUNTIME_LOCK}
-    declared = set((item.get("build") or {}).get("dependencies", []))
+def contents(item, collector, payload):
+    """The runtime, its PHP extensions, and every runtime and shared library
+    whose files it carries."""
+    shipped = {path.name for path in payload.rglob("*.dylib")}
+    unknown = set(LIBRARY_PREFIXES) - {entry["id"] for entry in RUNTIME_LOCK} - {component.identifier for component in collector.dependency_components()}
+    if unknown:
+        raise SystemExit(f"LIBRARY_PREFIXES names components the locks don't have: {', '.join(sorted(unknown))}")
+
+    def carried(identifier):
+        return identifier in BUILT_IN.get(item["id"], set()) or any(
+            name.startswith(prefix) for name in shipped for prefix in LIBRARY_PREFIXES.get(identifier, ()))
+
     runtimes = [item]
     # Extensions ship inside the PHP they were built for (imagick-php depends
     # on ImageMagick but is not part of its pack).
     runtimes += [entry for entry in RUNTIME_LOCK if item["kind"] == "php" and entry["kind"] == "php-extension"
                  and item["id"] in (entry.get("build") or {}).get("dependencies", [])]
-    runtimes += [by_id[identifier] for identifier in sorted(declared) if identifier in by_id
-                 and by_id[identifier]["kind"] in ("openssl", "library")]
-    targets = DEPENDENCY_TARGETS.get(item["id"], set())
-    dependencies = [component for component in collector.dependency_components()
-                    if component.identifier in declared or targets & set(component_targets(component))]
+    runtimes += [entry for entry in RUNTIME_LOCK if entry is not item and entry["kind"] != "php-extension" and carried(entry["id"])]
+    dependencies = [component for component in collector.dependency_components() if carried(component.identifier)]
     return runtimes, dependencies
-
-
-_dependency_lock = None
-
-
-def component_targets(component):
-    global _dependency_lock
-    if _dependency_lock is None:
-        _dependency_lock = {entry["id"]: entry for entry in
-                            json.loads((REPOSITORY / "locks/dependency-lock.json").read_text(encoding="utf-8"))["sources"]}
-    return _dependency_lock[component.identifier]["targets"]
 
 
 def sbom(item, payload, runtimes, dependencies):
@@ -152,7 +158,7 @@ def main():
         raise SystemExit(f"Runtime is not built: {payload}")
 
     collector = load_collector()
-    runtimes, dependencies = contents(item, collector)
+    runtimes, dependencies = contents(item, collector, payload)
     by_id = {component.identifier: component for component in collector.runtime_components()}
     source_components = [component for component in collector.runtime_components(None)
                          if any(component.identifier == entry["id"] or component.identifier.startswith(entry["id"] + "-patch")
