@@ -14,6 +14,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seconds", type=int, default=600)
     parser.add_argument("--rss-mb", type=int, default=1024)
+    # Per process, which includes the test runner itself: a slow runner on a
+    # long suite needs more than a single test.
+    parser.add_argument("--cpu-seconds", type=int, default=60)
     # Growth above the wired memory at start: an absolute ceiling trips at
     # once on a Mac that already wires more than that while idle.
     parser.add_argument("--wired-mb", type=int, default=4096,
@@ -27,7 +30,7 @@ def main():
     def limits():
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
         # Limit an individual runaway test, including children of the test runner.
-        resource.setrlimit(resource.RLIMIT_CPU, (60, 65))
+        resource.setrlimit(resource.RLIMIT_CPU, (args.cpu_seconds, args.cpu_seconds + 5))
 
     def wired_bytes():
         memory = subprocess.check_output(["/usr/bin/vm_stat"], text=True)

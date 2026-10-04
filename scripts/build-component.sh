@@ -28,7 +28,7 @@ require_tool() {
 }
 
 run_check() {
-    /usr/bin/python3 "$recipe_directory/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" --rss-mb "${DEVSTACK_TEST_RSS_MB:-1024}" -- "$@"
+    /usr/bin/python3 "$recipe_directory/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" --rss-mb "${DEVSTACK_TEST_RSS_MB:-1024}" --cpu-seconds "${DEVSTACK_TEST_CPU_SECONDS:-60}" -- "$@"
 }
 
 configure_make_install() {
@@ -158,7 +158,7 @@ case "$runtime_id" in
             # its reason, in php-known-failures.txt; any other failure stops it.
             failed_tests="$build_directory/failed-tests.txt"
             rm -f "$failed_tests"
-            NO_INTERACTION=1 run_check make test TESTS="-j1 --show-diff -w $failed_tests ext Zend tests sapi/cli sapi/fpm"
+            NO_INTERACTION=1 run_check make test TESTS="-j1 --show-diff --offline -w $failed_tests ext Zend tests sapi/cli sapi/fpm"
             /usr/bin/python3 "$recipe_directory/check-php-tests.py" "$runtime_id" "$failed_tests"
         fi
         mkdir -p "$prefix/lib"

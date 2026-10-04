@@ -67,6 +67,9 @@ jobs:
       # memory than the 1 GB a developer's Mac allows them (MySQL's
       # group-replication cache test needs more).
       DEVSTACK_TEST_RSS_MB: "4096"
+      # CPU seconds per process, the test runner included: PHP 7.4's runner
+      # needs more than a minute for its suite on the runner's cores.
+      DEVSTACK_TEST_CPU_SECONDS: "600"
       PACK_KEY_ID: devstack-release-1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

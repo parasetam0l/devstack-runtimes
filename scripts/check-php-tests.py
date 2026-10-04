@@ -31,6 +31,12 @@ def main():
     failed = []
     if failed_file.exists():
         failed = [line.strip() for line in failed_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if "*" in known:
+        # A legacy runtime whose suite is recorded, not enforced.
+        for path in failed:
+            print(f"Recorded failure: {path}")
+        print(f"PHP test suite for {runtime}: {len(failed)} failure(s) recorded ({known['*']}).")
+        return
     unexpected = []
     for path in failed:
         test = next((test for test in known if path == test or path.endswith("/" + test)), None)

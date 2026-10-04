@@ -30,7 +30,7 @@ dependency_test_failures=""
 run_check_suite() {
     local component="$1"
     shift
-    if /usr/bin/python3 "$repository_root/scripts/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" --rss-mb "${DEVSTACK_TEST_RSS_MB:-1024}" -- "$@"; then
+    if /usr/bin/python3 "$repository_root/scripts/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" --rss-mb "${DEVSTACK_TEST_RSS_MB:-1024}" --cpu-seconds "${DEVSTACK_TEST_CPU_SECONDS:-60}" -- "$@"; then
         return
     fi
     if [[ "${DEVSTACK_STRICT_TEST_SUITES:-0}" == "1" ]]; then
