@@ -1,15 +1,15 @@
 # Runtime build pipeline
 
-DevStack never builds or downloads software on an installed Mac. These scripts run only on the online release machine and produce the immutable `Contents/Resources/Runtimes` payload.
+These scripts run only on a build machine (a developer Mac or a CI runner) and compile every DevStack runtime into `.build/Runtimes`. DevStack itself never compiles anything on a user's Mac.
 
-The source of truth is `Sources/DevStackApp/Resources/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
+The source of truth is `locks/runtime-lock.json`. Every download is HTTPS-only and SHA-256 checked before extraction. Every runtime uses an isolated prefix. `audit-runtime.sh` rejects non-ARM64 code, unsigned Mach-O files, package-manager paths, build-machine paths, and forbidden RPATHs.
 
-Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. `scripts/package-release.sh` selects the modern payload, checks that every shipped component has licence notices and a verified source archive, signs the nested code, rebuilds the SBOM from the signed payload, signs the helper and app, and, when `DEVSTACK_NOTARY_PROFILE` is set, notarizes and staples the app before building the DMG, then notarizes and staples the DMG. Legacy payloads are considered only with `DEVSTACK_INCLUDE_LEGACY=1` and passing feasibility gates. Failed gates never remove staged payloads.
+Run `scripts/fetch-build-tools.sh` once per build host, then `scripts/verify-sources.sh` to download and SHA-256 check every locked artifact, then `scripts/build-dependencies.sh all` and `scripts/build-runtimes.sh all`. Until signed runtime packs are published from this repository, the [DevStack app repository](https://github.com/parasetam0l/devstack) packages this payload into the app: its `scripts/package-release.sh` checks licence notices and sources, signs, notarizes and builds the DMG. Legacy payloads are considered only with `DEVSTACK_INCLUDE_LEGACY=1` and passing feasibility gates. Failed gates never remove staged payloads.
 
 ## Required build host
 
 - Apple Silicon running macOS 27 with full Xcode selected by `xcode-select`.
-- The pinned build tools from `Dependencies/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf, Bison) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. The build scripts set their own `PATH` to these tools plus the system directories, so tools from a package manager never leak into a build.
+- The pinned build tools from `locks/build-tools-lock.json` (CMake, Ninja, Autoconf, Automake, GNU libtool, pkgconf, Bison) installed by `scripts/fetch-build-tools.sh` into `.build/build-tools`; they are build-host inputs and are never packaged. The build scripts set their own `PATH` to these tools plus the system directories, so tools from a package manager never leak into a build.
 - An Apple Developer ID Application identity and notarization keychain profile for a distributable image.
 
 No Homebrew or MacPorts prefix is accepted by the audit, even on the release machine.
@@ -26,7 +26,7 @@ For a preview payload, `DEVSTACK_DEFER_TEST_SUITES=1` skips the long PHP, PHP-ex
 
 PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.8 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
 
-The final release procedure runs all applicable upstream test suites, `DevStackCoreChecks`, the two feasibility gates, runtime auditing, nested signing, app signing, DMG signing, notarization, stapling, Gatekeeper assessment, and a network-disabled clean-machine acceptance pass.
+A release runs all applicable upstream test suites, the two feasibility gates, runtime auditing, signing, notarization, and DevStack's own runtime checks against the result.
 
 ## Current development build and safe verification
 

@@ -21,8 +21,8 @@ def main() -> None:
     root = pathlib.Path(sys.argv[1]).resolve()
     output = pathlib.Path(sys.argv[2]).resolve()
     repository = pathlib.Path(__file__).resolve().parents[1]
-    lock = json.loads((repository / "Sources/DevStackApp/Resources/runtime-lock.json").read_text(encoding="utf-8"))
-    dependency_lock = json.loads((repository / "Dependencies/dependency-lock.json").read_text(encoding="utf-8"))
+    lock = json.loads((repository / "locks/runtime-lock.json").read_text(encoding="utf-8"))
+    dependency_lock = json.loads((repository / "locks/dependency-lock.json").read_text(encoding="utf-8"))
     components = []
     for runtime in sorted(lock["runtimes"], key=lambda item: item["id"]):
         payload = root / runtime["id"]

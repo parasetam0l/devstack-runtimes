@@ -5,7 +5,7 @@ import json
 import pathlib
 import sys
 
-LOCK = pathlib.Path(__file__).resolve().parents[1] / "Sources/DevStackApp/Resources/runtime-lock.json"
+LOCK = pathlib.Path(__file__).resolve().parents[1] / "locks/runtime-lock.json"
 
 
 def main() -> None:

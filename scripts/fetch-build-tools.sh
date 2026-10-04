@@ -11,7 +11,7 @@ set -euo pipefail
 #   DEVSTACK_BUILD_JOBS         parallel compile jobs (default: all cores)
 
 repository_root="$(cd "$(dirname "$0")/.." && pwd)"
-lock="$repository_root/Dependencies/build-tools-lock.json"
+lock="$repository_root/locks/build-tools-lock.json"
 cache_directory="${DEVSTACK_BUILD_TOOLS_CACHE:-$repository_root/.build/build-tools-cache}"
 tools_root="${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}"
 work_root="${DEVSTACK_BUILD_TOOLS_WORK:-$repository_root/.build/build-tools-work}"

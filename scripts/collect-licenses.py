@@ -27,8 +27,8 @@ import tarfile
 import tempfile
 
 REPOSITORY = pathlib.Path(__file__).resolve().parents[1]
-RUNTIME_LOCK = REPOSITORY / "Sources/DevStackApp/Resources/runtime-lock.json"
-DEPENDENCY_LOCK = REPOSITORY / "Dependencies/dependency-lock.json"
+RUNTIME_LOCK = REPOSITORY / "locks/runtime-lock.json"
+DEPENDENCY_LOCK = REPOSITORY / "locks/dependency-lock.json"
 CACHE = pathlib.Path(os.environ.get("DEVSTACK_SOURCE_CACHE", REPOSITORY / ".build/runtime-cache"))
 NOTICE_NAME = re.compile(r"^(licen[cs]e|copying|notice|copyright)([._-].*)?$", re.IGNORECASE)
 # Scripts such as copyright.pl match the name pattern but are not notices.

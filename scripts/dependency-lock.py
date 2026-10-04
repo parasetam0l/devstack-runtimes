@@ -3,7 +3,7 @@ import json
 import pathlib
 import sys
 
-lock = json.loads((pathlib.Path(__file__).resolve().parents[1] / "Dependencies/dependency-lock.json").read_text(encoding="utf-8"))
+lock = json.loads((pathlib.Path(__file__).resolve().parents[1] / "locks/dependency-lock.json").read_text(encoding="utf-8"))
 if len(sys.argv) != 2:
     raise SystemExit("usage: dependency-lock.py apache|php")
 target = sys.argv[1]
