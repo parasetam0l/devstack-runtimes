@@ -20,6 +20,7 @@ jobs="${DEVSTACK_BUILD_JOBS:-2}"
 # rejects anything that ends up requiring a newer one.
 MACOSX_DEPLOYMENT_TARGET="$(/usr/bin/python3 "$recipe_directory/runtime-lock.py" get "$runtime_id" minimumMacOS)"
 export MACOSX_DEPLOYMENT_TARGET
+source "$recipe_directory/build-environment.sh"
 export ARCHFLAGS="-arch arm64"
 
 require_tool() {
@@ -214,7 +215,7 @@ case "$runtime_id" in
             -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=Release -DWITH_SSL="$output_root/openssl-3.5" \
             -DWITH_UNIT_TESTS=ON -DWITH_ROUTER=OFF -DWITH_NDB=OFF -DWITH_NDBCLUSTER=OFF \
-            -DCMAKE_BUILD_RPATH="$output_root/openssl-3.5/lib" \
+            -DCMAKE_BUILD_RPATH="$output_root/openssl-3.5/lib" "-DCMAKE_IGNORE_PREFIX_PATH=$ignored_prefixes" \
             "${mysql_options[@]}"
         "$cmake_command" --build . --parallel "$jobs"
         if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then

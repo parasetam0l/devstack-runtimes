@@ -8,6 +8,7 @@ pg_prefix="$output_root/postgresql-18"
 export PATH="$pg_prefix/bin:${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 MACOSX_DEPLOYMENT_TARGET="$("$repository_root/scripts/runtime-lock.py" minimum-macos)"
 export MACOSX_DEPLOYMENT_TARGET
+source "$repository_root/scripts/build-environment.sh"
 export CFLAGS="-arch arm64 -O2 -std=gnu11"
 export CPPFLAGS="-I$pg_prefix/include"
 export LDFLAGS="-L$pg_prefix/lib -Wl,-rpath,$pg_prefix/lib -Wl,-headerpad_max_install_names"

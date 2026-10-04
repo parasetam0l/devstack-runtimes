@@ -15,6 +15,7 @@ sdk="$(xcrun --show-sdk-path)"
 # runtime supports.
 MACOSX_DEPLOYMENT_TARGET="$("$repository_root/scripts/runtime-lock.py" minimum-macos)"
 export MACOSX_DEPLOYMENT_TARGET
+source "$repository_root/scripts/build-environment.sh"
 export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 export CXXFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 export LDFLAGS="-Wl,-headerpad_max_install_names"
@@ -76,8 +77,11 @@ build_cmake() {
     local source="$1" prefix="$2"
     shift 2
     # Older projects pin a pre-3.5 cmake_minimum_required, which CMake 4 refuses
-    # unless the policy floor is set explicitly.
-    cmake -S "$source" -B "$source/.devstack-build" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 "$@"
+    # unless the policy floor is set explicitly. Package managers' prefixes are
+    # ignored: GitHub's runners have Homebrew, and an optional library found
+    # there would ship as a dependency on /opt/homebrew.
+    cmake -S "$source" -B "$source/.devstack-build" -DCMAKE_INSTALL_PREFIX="$prefix" -DCMAKE_OSX_ARCHITECTURES=arm64 -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        "-DCMAKE_IGNORE_PREFIX_PATH=$ignored_prefixes" "$@"
     cmake --build "$source/.devstack-build" --parallel "$jobs"
     cmake --install "$source/.devstack-build"
     run_check_suite "${source##*/}" ctest --test-dir "$source/.devstack-build" --output-on-failure
@@ -182,7 +186,10 @@ build_target() {
                 build_autotools "$icu_source" "$prefix" --disable-samples --disable-extras
                 ;;
             oniguruma) build_autotools "$source" "$prefix" ;;
-            libzip) build_cmake "$source" "$prefix" -DBUILD_TOOLS=OFF -DBUILD_REGRESS=ON -DBUILD_EXAMPLES=OFF ;;
+            # Only the system's zlib, bzip2 and CommonCrypto; the optional
+            # backends would come from wherever CMake finds them.
+            libzip) build_cmake "$source" "$prefix" -DBUILD_TOOLS=OFF -DBUILD_REGRESS=ON -DBUILD_EXAMPLES=OFF \
+                -DENABLE_ZSTD=OFF -DENABLE_LZMA=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF ;;
             libjpeg-turbo) build_cmake "$source" "$prefix" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=OFF ;;
             freetype) build_autotools "$source" "$prefix" --with-zlib=no --with-bzip2=no --with-png=no --with-harfbuzz=no --with-brotli=no ;;
             libwebp) build_cmake "$source" "$prefix" -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF ;;
