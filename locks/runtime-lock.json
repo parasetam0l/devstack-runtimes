@@ -54,7 +54,7 @@
       "hashes": {},
       "license": "Apache-2.0",
       "source": {
-        "url": "https://downloads.apache.org/httpd/httpd-2.4.68.tar.bz2",
+        "url": "https://archive.apache.org/dist/httpd/httpd-2.4.68.tar.bz2",
         "sha256": "68c74d4df38c26bed4dfbdb8f3baf1eb532f3872357becc1bba5d136f6b63c06",
         "patches": []
       },
@@ -593,7 +593,7 @@
       "hashes": {},
       "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
       "source": {
-        "url": "https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-boost-5.7.44.tar.gz",
+        "url": "https://cdn.mysql.com/archives/mysql-5.7/mysql-boost-5.7.44.tar.gz",
         "sha256": "b8fe262c4679cb7bbc379a3f1addc723844db168628ce2acf78d33906849e491",
         "patches": []
       },
@@ -639,6 +639,9 @@
       "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
       "source": {
         "url": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.11.tar.gz",
+        "mirrors": [
+          "https://cdn.mysql.com/archives/mysql-8.4/mysql-8.4.11.tar.gz"
+        ],
         "sha256": "eb3051164d625dd346a8203f76e0d5d5d9aec51dbe9d51788e39ec6b3f1394c2",
         "patches": []
       },

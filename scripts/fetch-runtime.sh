@@ -34,9 +34,24 @@ if [[ -f "$destination" ]]; then
     rm -f "$destination"
 fi
 
+# Projects move superseded releases (cdn.mysql.com to /archives, for
+# example); the lock may list mirrors, tried in order with the same hash.
+candidates=("$url")
+if [[ $# -eq 2 ]]; then
+    while IFS= read -r mirror; do [[ -n "$mirror" ]] && candidates+=("$mirror"); done \
+        < <("$query" get "$runtime_id" source | /usr/bin/python3 -c 'import json, sys; print("\n".join(json.load(sys.stdin).get("mirrors", [])))')
+fi
 temporary="$destination.partial"
 rm -f "$temporary"
-/usr/bin/curl --fail --location --proto '=https' --tlsv1.2 --retry 3 --output "$temporary" "$url"
+downloaded=0
+for candidate in "${candidates[@]}"; do
+    if /usr/bin/curl --fail --location --proto '=https' --tlsv1.2 --retry 3 --output "$temporary" "$candidate"; then
+        downloaded=1
+        break
+    fi
+    echo "Not available, trying the next source: $candidate" >&2
+done
+[[ "$downloaded" == 1 ]] || { echo "No source for $runtime_id is available." >&2; exit 66; }
 actual_sha256="$(/usr/bin/shasum -a 256 "$temporary" | /usr/bin/awk '{print $1}')"
 if [[ "$actual_sha256" != "$expected_sha256" ]]; then
     rm -f "$temporary"
