@@ -14,7 +14,10 @@ export LDFLAGS="-L$pg_prefix/lib -Wl,-rpath,$pg_prefix/lib -Wl,-headerpad_max_in
 export PKG_CONFIG_PATH="$pg_prefix/lib/pkgconfig"
 export PGSQL_CFLAGS="-I$pg_prefix/include"
 export PGSQL_LIBS="-L$pg_prefix/lib -lpq"
-for php_id in php-8.4 php-8.5; do
+# The PHP runtimes to build drivers for; both modern ones by default.
+php_ids=(php-8.4 php-8.5)
+[[ $# -eq 0 ]] || php_ids=("$@")
+for php_id in "${php_ids[@]}"; do
     php_prefix="$output_root/$php_id"
     source_directory="$work_root/$php_id/source"
     [[ -d "$source_directory/ext/pgsql" ]] || { echo "Build $php_id before its PostgreSQL drivers" >&2; exit 66; }

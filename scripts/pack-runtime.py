@@ -75,7 +75,9 @@ def contents(item, collector):
     by_id = {entry["id"]: entry for entry in RUNTIME_LOCK}
     declared = set((item.get("build") or {}).get("dependencies", []))
     runtimes = [item]
-    runtimes += [entry for entry in RUNTIME_LOCK if entry["kind"] == "php-extension"
+    # Extensions ship inside the PHP they were built for (imagick-php depends
+    # on ImageMagick but is not part of its pack).
+    runtimes += [entry for entry in RUNTIME_LOCK if item["kind"] == "php" and entry["kind"] == "php-extension"
                  and item["id"] in (entry.get("build") or {}).get("dependencies", [])]
     runtimes += [by_id[identifier] for identifier in sorted(declared) if identifier in by_id
                  and by_id[identifier]["kind"] in ("openssl", "library")]

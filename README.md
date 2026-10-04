@@ -2,9 +2,9 @@
 
 The build pipeline for the server software [DevStack](https://github.com/parasetam0l/devstack) runs: web servers, PHP, databases and tools, each compiled natively for Apple Silicon from pinned, SHA-256-checked upstream sources.
 
-Every runtime is built in its own prefix, relocated so it runs from any folder, and audited: ARM64 only, signed, and no references to the build machine or a package manager. Built runtimes will be published here as signed, notarized runtime packs that DevStack downloads during setup. Each pack ships with its SBOM, licence notices and the exact sources it was built from.
+Every runtime is built for macOS 15 and later in its own prefix, relocated so it runs from any folder and loads only its own libraries, and audited: ARM64 only, signed, nothing newer than its minimum macOS, and no references to the build machine or a package manager. Each pack ships with its SBOM, licence notices and the exact sources it was built from.
 
-> **Status:** the pipeline builds the full payload today. Per-runtime packs and the release workflow are being added.
+Built runtimes are published here as signed, notarized runtime packs that DevStack downloads during setup, one release per pack, by the hand-started **Build runtime** workflow. How to build and publish them: [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Runtimes
 

@@ -1,0 +1,297 @@
+# Builds one DevStack runtime pack on GitHub's macOS 27 runner. It runs only
+# when started by hand: Actions → Build runtime → Run workflow.
+#
+# With "Publish" off, it builds, tests, audits and packs the runtime with a
+# throwaway key and keeps the pack as a workflow artifact: a dry run that
+# needs no secrets. With "Publish" on, it signs the runtime with Developer ID,
+# signs the pack with the DevStack runtime key, checks it exactly as DevStack
+# will, notarizes it and creates the release named after the pack
+# (for example php-8.5-8.5.11-r1).
+#
+# A runtime's inputs must be published first: most runtimes build against
+# OpenSSL; PHP also needs ImageMagick and PostgreSQL; Adminer needs PHP 8.5.
+# One-time setup (secrets) and the full build order: docs/RELEASING.md.
+name: Build runtime
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime:
+        description: Runtime
+        required: true
+        type: choice
+        options:
+          - openssl-3.5
+          - imagemagick-7.1
+          - postgresql-18
+          - php-8.5
+          - php-8.4
+          - php-7.4
+          - apache-2.4
+          - nginx-1.30
+          - mysql-8.4
+          - mysql-5.7
+          - mailpit-1.31.1
+          - phpmyadmin-5.2.3
+          - adminer-6.1.1
+          - composer-2.10.3
+      publish:
+        description: Sign, notarize and publish the release
+        required: true
+        type: boolean
+        default: false
+      devstack-ref:
+        description: DevStack commit or tag whose packager defines the pack format
+        required: true
+        type: string
+        default: main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-runtime-${{ inputs.runtime }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: xcode-27
+    timeout-minutes: 350
+    env:
+      RUNTIME: ${{ inputs.runtime }}
+      PUBLISH: ${{ inputs.publish }}
+      GH_TOKEN: ${{ github.token }}
+      DEVSTACK_BUILD_JOBS: "3"
+      PACK_KEY_ID: devstack-release-1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Plan the build
+        id: plan
+        run: |
+          scripts/ci-build-plan.py "$RUNTIME" | tee -a "$GITHUB_OUTPUT"
+          echo "NAME=$(scripts/ci-build-plan.py "$RUNTIME" | sed -n 's/^name=//p')" >> "$GITHUB_ENV"
+
+      - name: Check the release and the secrets
+        if: inputs.publish
+        env:
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          RUNTIME_PACK_SIGNING_KEY: ${{ secrets.RUNTIME_PACK_SIGNING_KEY }}
+        run: |
+          if gh release view "$NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $NAME already exists. Raise packRevision in locks/runtime-lock.json to rebuild it."
+            exit 1
+          fi
+          missing=()
+          for name in DEVELOPER_ID_P12_BASE64 DEVELOPER_ID_P12_PASSWORD NOTARY_APPLE_ID NOTARY_PASSWORD RUNTIME_PACK_SIGNING_KEY; do
+            [[ -n "${!name}" ]] || missing+=("$name")
+          done
+          if (( ${#missing[@]} )); then
+            echo "::error::Missing repository secrets: ${missing[*]} (see docs/RELEASING.md)."
+            exit 1
+          fi
+
+      # The pack format, the verifier and the trusted keys come from DevStack
+      # itself, so a pack is checked here exactly as the app will check it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: parasetam0l/devstack
+          ref: ${{ inputs.devstack-ref }}
+          path: devstack-app
+
+      - name: Build DevStack's packager
+        run: |
+          swift build -c release --product DevStackRuntimePackager --package-path devstack-app
+          echo "PACKAGER=$(swift build -c release --show-bin-path --package-path devstack-app)/DevStackRuntimePackager" >> "$GITHUB_ENV"
+          echo "TRUSTED_KEYS=$PWD/devstack-app/Sources/DevStackApp/Resources/trusted-runtime-keys.json" >> "$GITHUB_ENV"
+
+      - name: Restore the build tools
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .build/build-tools
+            .build/build-tools-cache
+          key: build-tools-${{ hashFiles('locks/build-tools-lock.json', 'scripts/fetch-build-tools.sh') }}
+
+      - name: Install the build tools
+        run: scripts/fetch-build-tools.sh
+
+      - name: Restore the sources
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .build/runtime-cache
+          key: sources-${{ hashFiles('locks/*.json') }}
+          restore-keys: sources-
+
+      - name: Download and verify the sources
+        run: scripts/verify-sources.sh
+
+      - name: Restore the shared libraries
+        if: steps.plan.outputs.dependencies != ''
+        id: dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .build/runtime-dependencies
+          key: dependencies-${{ steps.plan.outputs.dependencies }}-${{ hashFiles('locks/*.json', 'scripts/build-dependencies.sh', 'scripts/prepare-build-libraries.sh') }}
+
+      - name: Build the shared libraries
+        if: steps.plan.outputs.dependencies != '' && steps.dependencies.outputs.cache-hit != 'true'
+        run: |
+          for tree in ${{ steps.plan.outputs.dependencies }}; do
+            scripts/build-dependencies.sh "$tree"
+          done
+
+      - name: Install the published input runtimes
+        if: steps.plan.outputs.inputs != ''
+        run: |
+          mkdir -p .build/Runtimes "$RUNNER_TEMP/inputs"
+          for input in ${{ steps.plan.outputs.inputs }}; do
+            name="$(scripts/ci-build-plan.py "$input" | sed -n 's/^name=//p')"
+            if ! gh release download "$name" --repo "$GITHUB_REPOSITORY" --pattern "$name.devstack-runtime" --dir "$RUNNER_TEMP/inputs"; then
+              echo "::error::$input is an input of $RUNTIME: publish $name first (Build runtime with Publish on)."
+              exit 1
+            fi
+            "$PACKAGER" install "$RUNNER_TEMP/inputs/$name.devstack-runtime" "$TRUSTED_KEYS" .build/Runtimes ${{ vars.TEAM_ID }}
+          done
+
+      - name: Build ${{ inputs.runtime }}
+        run: |
+          scripts/build-runtimes.sh ${{ steps.plan.outputs.build }}
+          if [[ -n "${{ steps.plan.outputs.postgresql_drivers }}" ]]; then
+            scripts/build-postgresql-extensions.sh ${{ steps.plan.outputs.postgresql_drivers }}
+          fi
+
+      # Legacy runtimes ship only when their feasibility gate passes.
+      - name: Run the legacy gate
+        if: inputs.runtime == 'php-7.4' || inputs.runtime == 'mysql-5.7'
+        run: |
+          case "$RUNTIME" in
+            php-7.4) scripts/gates/php74.sh ;;
+            mysql-5.7) scripts/gates/mysql57.sh ;;
+          esac
+
+      - name: Import the Developer ID certificate
+        if: inputs.publish
+        env:
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          printf '%s' "$DEVELOPER_ID_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$keychain" -P "$DEVELOPER_ID_P12_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$RUNNER_TEMP/developer-id.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -n 1)"
+          [[ -n "$identity" ]] || { echo "::error::No Developer ID Application identity in the certificate."; exit 1; }
+          team="$(printf '%s' "$identity" | sed -n 's/.*(\([A-Z0-9]\{10\}\))$/\1/p')"
+          {
+            echo "KEYCHAIN=$keychain"
+            echo "IDENTITY=$identity"
+            echo "TEAM_ID=$team"
+          } >> "$GITHUB_ENV"
+
+      - name: Sign ${{ inputs.runtime }} with Developer ID
+        if: inputs.publish
+        run: |
+          list="$RUNNER_TEMP/mach-o-files"
+          /usr/bin/python3 scripts/mach-o-files.py "$PWD/.build/Runtimes/$RUNTIME" > "$list"
+          while IFS= read -r -d '' binary; do
+            codesign --force --options runtime --timestamp --keychain "$KEYCHAIN" --sign "$IDENTITY" "$binary"
+          done < "$list"
+          scripts/audit-runtime.sh .build/Runtimes
+
+      - name: Pack ${{ inputs.runtime }}
+        env:
+          RUNTIME_PACK_SIGNING_KEY: ${{ secrets.RUNTIME_PACK_SIGNING_KEY }}
+        run: |
+          if [[ "$PUBLISH" == "true" ]]; then
+            printf '%s' "$RUNTIME_PACK_SIGNING_KEY" | base64 --decode > "$RUNNER_TEMP/pack.key"
+            key_id="$PACK_KEY_ID"
+            trusted="$TRUSTED_KEYS"
+          else
+            # A dry run never sees the real key.
+            "$PACKAGER" generate-key dry-run "$RUNNER_TEMP/pack.key" "$RUNNER_TEMP/dry-run-keys.json"
+            key_id=dry-run
+            trusted="$RUNNER_TEMP/dry-run-keys.json"
+          fi
+          DEVSTACK_PACKAGER="$PACKAGER" DEVSTACK_PACK_KEY_ID="$key_id" DEVSTACK_PACK_KEY_FILE="$RUNNER_TEMP/pack.key" \
+            scripts/pack-runtime.py "$RUNTIME" .build/packs
+          rm -f "$RUNNER_TEMP/pack.key"
+          # The checks DevStack runs before installing: signature, inventory,
+          # links, minimum macOS, and with Publish the Developer ID team.
+          "$PACKAGER" verify ".build/packs/$NAME/$NAME.devstack-runtime" "$trusted" ${TEAM_ID:-}
+          cat ".build/packs/$NAME/pack.json"
+
+      - name: Notarize the pack
+        if: inputs.publish
+        env:
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          cp ".build/packs/$NAME/$NAME.devstack-runtime" "$RUNNER_TEMP/$NAME.zip"
+          scripts/notarize.sh "$RUNNER_TEMP/$NAME.zip"
+
+      - name: Publish the release
+        if: inputs.publish
+        run: |
+          pack=".build/packs/$NAME"
+          python3 - "$pack/pack.json" > "$RUNNER_TEMP/notes.md" <<'PY'
+          import json, sys
+          pack = json.load(open(sys.argv[1]))
+          requires = ", ".join(pack["requires"]) or "nothing"
+          contents = ", ".join(pack["contents"]) or "nothing else"
+          print(f"""DevStack runtime pack **{pack['id']} {pack['version']}** (pack revision {pack['packRevision']}) for macOS {pack['minimumMacOS']} and later on Apple silicon.
+
+          DevStack downloads and verifies this pack itself; there is nothing to install by hand.
+
+          - Requires: {requires}
+          - Also contains: {contents}
+          - Size: {pack['size'] / 1048576:.1f} MB
+          - SHA-256: `{pack['sha256']}`
+
+          The SBOM lists every file with its hash. `sources-*` are the exact upstream sources and patches it was built from.""".replace("\n          ", "\n"))
+          PY
+          ( cd "$pack/sources" && for archive in *; do mv "$archive" "sources-$archive"; done )
+          gh release create "$NAME" "$pack/$NAME.devstack-runtime" "$pack/$NAME.sbom.cdx.json" "$pack/pack.json" "$pack"/sources/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$RUNTIME ${NAME#"$RUNTIME"-}" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+          echo "Published $NAME. Pin it in DevStack with scripts/pin-runtime.sh." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the dry-run pack
+        if: ${{ !inputs.publish }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.NAME }}-dry-run
+          path: |
+            .build/packs/${{ env.NAME }}/*.devstack-runtime
+            .build/packs/${{ env.NAME }}/*.sbom.cdx.json
+            .build/packs/${{ env.NAME }}/pack.json
+          retention-days: 7
+
+      - name: Keep the build logs
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ inputs.runtime }}-logs
+          path: |
+            .build/runtime-work/**/config.log
+            .build/runtime-work/**/*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Remove the signing keychain
+        if: always()
+        run: |
+          [[ -n "${KEYCHAIN:-}" ]] && security delete-keychain "$KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/pack.key"
