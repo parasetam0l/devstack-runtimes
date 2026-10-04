@@ -158,8 +158,11 @@ case "$runtime_id" in
             # its reason, in php-known-failures.txt; any other failure stops it.
             failed_tests="$build_directory/failed-tests.txt"
             rm -f "$failed_tests"
+            set +e
             NO_INTERACTION=1 run_check make test TESTS="-j1 --show-diff --offline -w $failed_tests ext Zend tests sapi/cli sapi/fpm"
-            /usr/bin/python3 "$recipe_directory/check-php-tests.py" "$runtime_id" "$failed_tests"
+            suite_status=$?
+            set -e
+            /usr/bin/python3 "$recipe_directory/check-php-tests.py" "$runtime_id" "$failed_tests" "$suite_status"
         fi
         mkdir -p "$prefix/lib"
         find "$dependencies/lib" -name '*.dylib' -maxdepth 3 -exec cp -R {} "$prefix/lib/" \;
