@@ -81,6 +81,11 @@ while IFS= read -r -d '' binary; do
     done < <(/usr/bin/otool -l "$binary" | /usr/bin/awk '/LC_RPATH/{getline; getline; print $2}')
 done < "$binary_list"
 
+# Every library a binary links must be found inside its own runtime.
+if ! /usr/bin/python3 "$script_directory/runtime-load-paths.py" check "$runtime_directory" "$binary_list"; then
+    failures=$((failures + 1))
+fi
+
 if [[ $failures -ne 0 ]]; then
     echo "$failures runtime audit failure(s)" >&2
     exit 65

@@ -164,7 +164,9 @@ case "$runtime_id" in
         export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -Wl,-rpath,$dependencies/lib -Wl,-rpath,$openssl_prefix/lib -Wl,-headerpad_max_install_names"
         configure_make_install --prefix="$prefix" --with-ssl=openssl --with-libedit-preferred
         mkdir -p "$prefix/lib"
-        find "$dependencies/lib" -maxdepth 1 -name 'libicu*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        # Every library PostgreSQL links from the dependency tree ships with
+        # it: the runtime may not borrow zlib from another runtime.
+        find "$dependencies/lib" -maxdepth 1 \( -name 'libicu*.dylib' -o -name 'libz.*.dylib' \) -exec cp -R {} "$prefix/lib/" \;
         find "$openssl_prefix/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
         # Common PostgreSQL extensions, including pgcrypto and citext.
         make -C "$build_directory/contrib" -j "$jobs"

@@ -13,9 +13,6 @@ forbidden_roots=("$runtime_root")
 for root in "$@"; do
     forbidden_roots+=("$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$root")")
 done
-library_directories=()
-while IFS= read -r directory; do library_directories+=("$directory"); done < <(/usr/bin/find "$runtime_root" -type f -name '*.dylib' -exec dirname {} \; | /usr/bin/sort -u)
-
 # Install names are rewritten to each dylib's real file basename below, so
 # every reference must use that same leaf name: dyld rejects a dylib whose
 # install name leaf differs from the requested one. Record symlink leaf
@@ -72,22 +69,14 @@ while IFS= read -r -d '' binary; do
         fi
     done < <(/usr/bin/otool -L "$binary" | /usr/bin/tail -n +2 | /usr/bin/awk '{print $1}')
 
-    while IFS= read -r existing_rpath; do
-        for root in "${forbidden_roots[@]}"; do
-            if [[ "$existing_rpath" == "$root"/* || "$existing_rpath" == "$root" ]]; then
-                /usr/bin/install_name_tool -delete_rpath "$existing_rpath" "$binary"
-            fi
-        done
-    done < <(/usr/bin/otool -l "$binary" | /usr/bin/awk '/LC_RPATH/{getline; getline; print $2}')
+done < "$binary_list"
 
-    binary_directory="$(dirname "$binary")"
-    if [[ ${#library_directories[@]} -gt 0 ]]; then
-        for library_directory in "${library_directories[@]}"; do
-            relative="$(/usr/bin/python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$library_directory" "$binary_directory")"
-            rpath="@loader_path/$relative"
-            /usr/bin/install_name_tool -add_rpath "$rpath" "$binary" 2>/dev/null || true
-        done
-    fi
+# Each top-level runtime ships as its own pack, so every binary searches only
+# the folders of its own runtime that hold the libraries it links against.
+# Absolute search paths and paths into other runtimes are removed.
+/usr/bin/python3 "$script_directory/runtime-load-paths.py" fix "$runtime_root" "$binary_list"
+
+while IFS= read -r -d '' binary; do
     /usr/bin/codesign --force --sign - --timestamp=none "$binary"
 done < "$binary_list"
 
