@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Fails when PHP's test suite failed a test that is not a known failure.
 
-Usage: check-php-tests.py RUNTIME_ID FAILED_TESTS_FILE SUITE_STATUS
+Usage: check-php-tests.py RUNTIME_ID TEST_RESULTS_FILE SUITE_STATUS
 
-FAILED_TESTS_FILE is run-tests.php's -w list, which run-tests creates when it
-starts and fills with failed tests. SUITE_STATUS is the exit status of
+TEST_RESULTS_FILE is run-tests.php's -W list, which run-tests creates when it
+starts and fills with each test's result ("FAILED<tab>path"); expected
+failures (XFAILED) and warnings don't count as failures. SUITE_STATUS is the exit status of
 `make test` under run-bounded-check.py: non-zero when tests failed (PHP 8's
 run-tests always reports it), 124 when the guard stopped the suite. Known
 failures, each with its reason, are listed in php-known-failures.txt next to
@@ -12,6 +13,10 @@ this script.
 """
 import pathlib
 import sys
+
+
+# run-tests' results that fail a suite; XFAILED, WARNED, SKIPPED and PASSED don't.
+FAILURES = {"FAILED", "BORKED", "LEAKED"}
 
 
 def known_failures(runtime):
@@ -29,12 +34,13 @@ def known_failures(runtime):
 def main():
     if len(sys.argv) != 4:
         raise SystemExit(__doc__.strip())
-    runtime, failed_file, status = sys.argv[1], pathlib.Path(sys.argv[2]), int(sys.argv[3])
+    runtime, results_file, status = sys.argv[1], pathlib.Path(sys.argv[2]), int(sys.argv[3])
     if status == 124:
         raise SystemExit(f"The {runtime} test suite was stopped by the test guard.")
-    if not failed_file.exists():
+    if not results_file.exists():
         raise SystemExit(f"The {runtime} test suite did not run (exit status {status}).")
-    failed = [line.strip() for line in failed_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    results = [line.split("\t", 1) for line in results_file.read_text(encoding="utf-8").splitlines() if "\t" in line]
+    failed = [path.strip() for result, path in results if result in FAILURES]
     if status != 0 and not failed:
         raise SystemExit(f"The {runtime} test suite failed (exit status {status}) without reporting a failed test.")
     known = known_failures(runtime)
@@ -56,7 +62,7 @@ def main():
         for path in unexpected:
             print(f"  {path}", file=sys.stderr)
         raise SystemExit(1)
-    print(f"PHP test suite for {runtime}: {len(failed)} known failure(s), no others.")
+    print(f"PHP test suite for {runtime}: {len(results)} tests, {len(failed)} known failure(s), no others.")
 
 
 if __name__ == "__main__":
