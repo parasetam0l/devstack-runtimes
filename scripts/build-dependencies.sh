@@ -94,7 +94,7 @@ build_zlib() {
 
 create_system_pc_files() {
     local prefix="$1"
-    mkdir -p "$prefix/lib/pkgconfig"
+    mkdir -p "$prefix/lib/pkgconfig" "$prefix/include"
     /usr/bin/python3 - "$prefix" "$sdk" <<'PY'
 import pathlib, sys
 
