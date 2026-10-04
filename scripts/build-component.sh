@@ -246,6 +246,9 @@ case "$runtime_id" in
             --with-ld-opt="-arch arm64 -Wl,-headerpad_max_install_names -L$output_root/openssl-3.5/lib -L$dependencies/lib -Wl,-rpath,$output_root/openssl-3.5/lib -Wl,-rpath,$dependencies/lib"
         make -j "$jobs"
         make install
+        # Reinstalling over an earlier build leaves the previous binary as
+        # nginx.old; it is not part of the runtime.
+        rm -f "$prefix/sbin/nginx.old"
         mkdir -p "$prefix/lib"
         find "$output_root/openssl-3.5/lib" "$dependencies/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
         ;;
