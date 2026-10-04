@@ -136,7 +136,9 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .build/runtime-dependencies
-          key: dependencies-${{ steps.plan.outputs.dependencies }}-${{ hashFiles('locks/*.json', 'scripts/build-dependencies.sh', 'scripts/prepare-build-libraries.sh') }}
+          # Only what the shared libraries are built from: a new runtime version
+          # or pack revision leaves them as they are.
+          key: dependencies-${{ steps.plan.outputs.dependencies }}-macos${{ steps.plan.outputs.minimum_macos }}-${{ hashFiles('locks/dependency-lock.json', 'locks/build-tools-lock.json', 'scripts/build-dependencies.sh', 'scripts/build-environment.sh', 'scripts/prepare-build-libraries.sh', 'scripts/dependency-lock.py') }}
 
       - name: Build the shared libraries
         if: steps.plan.outputs.dependencies != '' && steps.dependencies.outputs.cache-hit != 'true'

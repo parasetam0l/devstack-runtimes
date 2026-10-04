@@ -64,6 +64,8 @@ def main():
         "inputs": " ".join(inputs),
         "build": " ".join([item["id"]] + extensions),
         "postgresql_drivers": item["id"] if item["id"] in POSTGRESQL_DRIVERS else "",
+        # The shared libraries are built for the oldest macOS any runtime supports.
+        "minimum_macos": min((entry["minimumMacOS"] for entry in RUNTIMES), key=lambda version: tuple(map(int, version.split(".")))),
     }
     for key, value in lines.items():
         print(f"{key}={value}")
