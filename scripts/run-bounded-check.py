@@ -14,7 +14,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seconds", type=int, default=600)
     parser.add_argument("--rss-mb", type=int, default=1024)
-    parser.add_argument("--wired-mb", type=int, default=4096)
+    # Growth above the wired memory at start: an absolute ceiling trips at
+    # once on a Mac that already wires more than that while idle.
+    parser.add_argument("--wired-mb", type=int, default=4096,
+                        help="maximum growth of system wired memory during the check")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
@@ -26,6 +29,12 @@ def main():
         # Limit an individual runaway test, including children of the test runner.
         resource.setrlimit(resource.RLIMIT_CPU, (60, 65))
 
+    def wired_bytes():
+        memory = subprocess.check_output(["/usr/bin/vm_stat"], text=True)
+        page_size = int(re.search(r"page size of (\d+) bytes", memory)[1])
+        return int(re.search(r"Pages wired down:\s+(\d+)", memory)[1]) * page_size
+
+    wired_at_start = wired_bytes() if sys.platform == "darwin" else 0
     process = subprocess.Popen(command, start_new_session=True, preexec_fn=limits)
     deadline = time.monotonic() + args.seconds
     aborted = None
@@ -51,13 +60,9 @@ def main():
             if rss > args.rss_mb * 1024:
                 aborted = "test process memory limit exceeded"
                 break
-            if sys.platform == "darwin":
-                memory = subprocess.check_output(["/usr/bin/vm_stat"], text=True)
-                page_size = int(re.search(r"page size of (\d+) bytes", memory)[1])
-                wired = int(re.search(r"Pages wired down:\s+(\d+)", memory)[1]) * page_size
-                if wired > args.wired_mb * 1024**2:
-                    aborted = "system wired-memory limit exceeded"
-                    break
+            if sys.platform == "darwin" and wired_bytes() - wired_at_start > args.wired_mb * 1024**2:
+                aborted = "system wired-memory growth limit exceeded"
+                break
             time.sleep(0.5)
     finally:
         # A successful test runner can still leave debugger children alive.
