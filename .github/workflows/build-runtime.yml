@@ -237,6 +237,12 @@ jobs:
           NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
           NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
         run: |
+          # phpMyAdmin, Adminer and Composer are PHP code only: nothing for
+          # Gatekeeper to check, and the notary service wants code.
+          if [[ ! -s "$RUNNER_TEMP/mach-o-files" ]]; then
+            echo "$RUNTIME has no Mach-O files: nothing to notarize."
+            exit 0
+          fi
           cp ".build/packs/$NAME/$NAME.devstack-runtime" "$RUNNER_TEMP/$NAME.zip"
           scripts/notarize.sh "$RUNNER_TEMP/$NAME.zip"
 
