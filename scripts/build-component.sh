@@ -61,6 +61,19 @@ build_php_extension() {
     make -j "$jobs"
     if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
         echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the $extension_name test suite for this pass." >&2
+    elif [[ "$extension_name" != "imagick" ]]; then
+        # Neither has a suite `make test` can run: Xdebug replaces it with a
+        # notice (its tests need run-xdebug-tests.php and a debugger client),
+        # and redis's tests (TestRedis.php) need a Redis server. Check that
+        # the extension loads into its PHP and reports its version.
+        local directive=extension
+        [[ "$extension_name" == "xdebug" ]] && directive=zend_extension
+        "$php_prefix/bin/php" -n -d "$directive=$PWD/modules/$extension_name.so" -r '
+            $name = $argv[1];
+            if (!extension_loaded($name) || phpversion($name) === false) { fwrite(STDERR, "$name did not load\n"); exit(1); }
+            if ($name === "redis" && !class_exists("Redis")) { fwrite(STDERR, "redis has no Redis class\n"); exit(1); }
+            echo "$name ", phpversion($name), " loads into PHP ", PHP_VERSION, " (no runnable test suite)\n";
+        ' "$extension_name"
     else
         # ImageMagick as DevStack runs it (RuntimeEnvironment.services): its
         # configuration, fonts included, comes from the runtime only.
