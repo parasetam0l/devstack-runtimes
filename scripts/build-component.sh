@@ -257,8 +257,11 @@ case "$runtime_id" in
         # Reinstalling over an earlier build leaves the previous binary as
         # nginx.old; it is not part of the runtime.
         rm -f "$prefix/sbin/nginx.old"
+        # Nginx links OpenSSL and PCRE2 only; the rest of the Apache libraries
+        # stay out of its runtime.
         mkdir -p "$prefix/lib"
-        find "$output_root/openssl-3.5/lib" "$dependencies/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        find "$output_root/openssl-3.5/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
+        find "$dependencies/lib" -maxdepth 1 -name 'libpcre2-8*.dylib' -exec cp -R {} "$prefix/lib/" \;
         ;;
     adminer-6.1.1)
         mkdir -p "$prefix"
