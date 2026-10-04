@@ -62,7 +62,12 @@ build_php_extension() {
     if [[ "${DEVSTACK_DEFER_TEST_SUITES:-0}" == "1" ]]; then
         echo "DEVSTACK_DEFER_TEST_SUITES=1: deferring the $extension_name test suite for this pass." >&2
     else
-        NO_INTERACTION=1 REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE="$php_prefix/bin/php" run_check make test TESTS="-j1 --show-diff"
+        # ImageMagick as DevStack runs it (RuntimeEnvironment.services): its
+        # configuration, fonts included, comes from the runtime only.
+        local magick="$output_root/imagemagick-7.1"
+        MAGICK_HOME="$magick" MAGICK_CONFIGURE_PATH="$magick/etc/ImageMagick-7:$magick/share/ImageMagick-7" \
+            DEVSTACK_MAGICK_CONFIG_ONLY=1 NO_INTERACTION=1 REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE="$php_prefix/bin/php" \
+            run_check make test TESTS="-j1 --show-diff"
     fi
     mkdir -p "$php_prefix/lib/php/extensions"
     cp "modules/$extension_name.so" "$php_prefix/lib/php/extensions/$extension_name.so"
@@ -89,6 +94,7 @@ case "$runtime_id" in
             --prefix="$prefix" --disable-static --enable-shared --without-x \
             --without-perl --without-opencl --with-modules=no --with-png=yes --with-jpeg=yes --with-zlib=yes \
             --with-webp=yes --with-freetype=yes --disable-dependency-tracking
+        "$recipe_directory/imagemagick-fonts.py" "$prefix"
         mkdir -p "$prefix/lib"
         find "$dependencies/lib" -maxdepth 1 \( -name 'libpng*.dylib' -o -name 'libjpeg*.dylib' -o -name 'libz.*.dylib' \
             -o -name 'libwebp*.dylib' -o -name 'libsharpyuv*.dylib' -o -name 'libfreetype*.dylib' -o -name 'libzip*.dylib' \) \

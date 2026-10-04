@@ -767,7 +767,7 @@
       "id": "imagemagick-7.1",
       "kind": "library",
       "version": "7.1.2-32",
-      "packRevision": 1,
+      "packRevision": 2,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
       "entryPoints": {
