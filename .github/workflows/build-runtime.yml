@@ -63,6 +63,10 @@ jobs:
       PUBLISH: ${{ inputs.publish }}
       GH_TOKEN: ${{ github.token }}
       DEVSTACK_BUILD_JOBS: "3"
+      # The runner is a 7 GB machine of its own: upstream tests may use more
+      # memory than the 1 GB a developer's Mac allows them (MySQL's
+      # group-replication cache test needs more).
+      DEVSTACK_TEST_RSS_MB: "4096"
       PACK_KEY_ID: devstack-release-1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

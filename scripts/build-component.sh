@@ -28,7 +28,7 @@ require_tool() {
 }
 
 run_check() {
-    /usr/bin/python3 "$recipe_directory/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" -- "$@"
+    /usr/bin/python3 "$recipe_directory/run-bounded-check.py" --seconds "${DEVSTACK_TEST_SECONDS:-1200}" --rss-mb "${DEVSTACK_TEST_RSS_MB:-1024}" -- "$@"
 }
 
 configure_make_install() {
