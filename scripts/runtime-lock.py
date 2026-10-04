@@ -11,10 +11,16 @@ LOCK = pathlib.Path(__file__).resolve().parents[1] / "locks/runtime-lock.json"
 def main() -> None:
     data = json.loads(LOCK.read_text(encoding="utf-8"))
     if len(sys.argv) < 2:
-        raise SystemExit("usage: runtime-lock.py list | patches | get ID FIELD | patch ID INDEX FIELD")
+        raise SystemExit("usage: runtime-lock.py list | patches | minimum-macos | get ID FIELD | patch ID INDEX FIELD")
     command = sys.argv[1]
     if command == "list":
         print("\n".join(item["id"] for item in data["runtimes"]))
+        return
+    if command == "minimum-macos":
+        # The oldest macOS any runtime supports: shared dependency libraries
+        # are built for it.
+        versions = [item["minimumMacOS"] for item in data["runtimes"]]
+        print(min(versions, key=lambda value: tuple(int(part) for part in value.split("."))))
         return
     if command == "patches":
         for item in data["runtimes"]:

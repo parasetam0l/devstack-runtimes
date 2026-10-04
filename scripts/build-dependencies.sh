@@ -11,7 +11,10 @@ dependency_root="${DEVSTACK_DEPENDENCY_ROOT:-$repository_root/.build/runtime-dep
 export PATH="${DEVSTACK_BUILD_TOOLS_ROOT:-$repository_root/.build/build-tools}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 jobs="${DEVSTACK_BUILD_JOBS:-$(sysctl -n hw.logicalcpu)}"
 sdk="$(xcrun --show-sdk-path)"
-export MACOSX_DEPLOYMENT_TARGET=27.0
+# Shared libraries serve every runtime, so they target the oldest macOS any
+# runtime supports.
+MACOSX_DEPLOYMENT_TARGET="$("$repository_root/scripts/runtime-lock.py" minimum-macos)"
+export MACOSX_DEPLOYMENT_TARGET
 export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 export CXXFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
 export LDFLAGS="-Wl,-headerpad_max_install_names"

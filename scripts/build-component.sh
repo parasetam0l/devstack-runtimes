@@ -16,7 +16,10 @@ prefix="$DEVSTACK_RUNTIME_PREFIX"
 output_root="$DEVSTACK_RUNTIME_OUTPUT"
 dependency_root="$DEVSTACK_DEPENDENCY_ROOT"
 jobs="${DEVSTACK_BUILD_JOBS:-2}"
-export MACOSX_DEPLOYMENT_TARGET=27.0
+# The oldest macOS the runtime supports comes from the lock; audit-runtime.sh
+# rejects anything that ends up requiring a newer one.
+MACOSX_DEPLOYMENT_TARGET="$(/usr/bin/python3 "$recipe_directory/runtime-lock.py" get "$runtime_id" minimumMacOS)"
+export MACOSX_DEPLOYMENT_TARGET
 export ARCHFLAGS="-arch arm64"
 
 require_tool() {
