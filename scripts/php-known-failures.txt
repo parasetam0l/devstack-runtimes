@@ -2,7 +2,7 @@
 # reason. The PHP recipe stops on any failure not listed here; a listed test
 # may also pass. check-php-tests.py reads this file.
 #
-# Columns: PHP runtimes (comma-separated), test, reason. A test of * records
+# Columns: PHP runtimes or extensions (comma-separated IDs), test, reason. A test of * records
 # the runtime's failures without enforcing them.
 
 # macOS's iconv (the system library PHP is built against) handles invalid
@@ -34,3 +34,8 @@ php-8.4  sapi/fpm/tests/socket-uds-too-long-filename-start.phpt  build folder pa
 # recorded; scripts/gates/php74.sh, which the workflow runs next, enforces
 # the OpenSSL, curl, hash and phar suites with its own reviewed exceptions.
 php-7.4  *  legacy runtime, accepted by scripts/gates/php74.sh
+
+# ImageMagick 7.1.2 counts two colors just outside the fuzz distance as
+# similar, where imagick 3.8.1's test expects the earlier boundary; all of
+# its "similar" cases pass.
+imagick-php  tests/024-ispixelsimilar.phpt  ImageMagick 7.1.2's fuzz boundary differs from the test's

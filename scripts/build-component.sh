@@ -64,10 +64,18 @@ build_php_extension() {
     else
         # ImageMagick as DevStack runs it (RuntimeEnvironment.services): its
         # configuration, fonts included, comes from the runtime only.
+        # Failures are judged like PHP's own (php-known-failures.txt, under
+        # the extension's runtime ID).
         local magick="$output_root/imagemagick-7.1"
+        local test_results="$extension_work/test-results.txt" suite_status
+        rm -f "$test_results"
+        set +e
         MAGICK_HOME="$magick" MAGICK_CONFIGURE_PATH="$magick/etc/ImageMagick-7:$magick/share/ImageMagick-7" \
-            DEVSTACK_MAGICK_CONFIG_ONLY=1 NO_INTERACTION=1 REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE="$php_prefix/bin/php" \
-            run_check make test TESTS="-j1 --show-diff"
+            DEVSTACK_MAGICK_CONFIG_ONLY=1 NO_INTERACTION=1 TEST_PHP_EXECUTABLE="$php_prefix/bin/php" \
+            run_check make test TESTS="-j1 --show-diff --offline -W $test_results"
+        suite_status=$?
+        set -e
+        /usr/bin/python3 "$recipe_directory/check-php-tests.py" "$runtime_id" "$test_results" "$suite_status"
     fi
     mkdir -p "$php_prefix/lib/php/extensions"
     cp "modules/$extension_name.so" "$php_prefix/lib/php/extensions/$extension_name.so"
