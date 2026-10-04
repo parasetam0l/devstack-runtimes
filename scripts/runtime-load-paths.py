@@ -166,7 +166,9 @@ def main():
     with open(sys.argv[3], "rb") as listing:
         binaries = [os.fsdecode(item) for item in listing.read().split(b"\0") if item]
     if not binaries:
-        raise SystemExit("No Mach-O files to process.")
+        # phpMyAdmin, Adminer and Composer are PHP code only.
+        print(f"No Mach-O files under {root}: no load paths to {command}.")
+        return
     failures = 0
     for binary in binaries:
         if not os.path.abspath(binary).startswith(root + os.sep):

@@ -38,7 +38,18 @@ done < <(/usr/bin/find "$runtime_directory" -type l -name '*.dylib' -print0)
 # Listed into a file first: macOS bash cannot observe a failure inside process
 # substitution, so a crashing lister would make the audit pass on nothing.
 /usr/bin/python3 "$script_directory/mach-o-files.py" "$runtime_directory" > "$binary_list"
-[[ -s "$binary_list" ]] || { echo "No Mach-O files found under $runtime_directory" >&2; exit 65; }
+
+# Every runtime holds compiled code except the PHP applications; one without
+# any would mean a failed or emptied build.
+for runtime_path in "$runtime_directory"/*/; do
+    runtime="$(basename "$runtime_path")"
+    if ! /usr/bin/tr '\0' '\n' < "$binary_list" | /usr/bin/grep -F "$runtime_directory/$runtime/" >/dev/null; then
+        case "$(/usr/bin/python3 "$script_directory/runtime-lock.py" get "$runtime" kind 2>/dev/null || true)" in
+            phpmyadmin|adminer|composer) ;;
+            *) echo "No Mach-O files in $runtime" >&2; failures=$((failures + 1)) ;;
+        esac
+    fi
+done
 
 while IFS= read -r -d '' binary; do
     if ! /usr/bin/file "$binary" | /usr/bin/grep -q 'Mach-O'; then
