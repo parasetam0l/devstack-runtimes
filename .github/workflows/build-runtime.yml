@@ -12,6 +12,7 @@
 # OpenSSL; PHP also needs ImageMagick and PostgreSQL; Adminer needs PHP 8.5.
 # One-time setup (secrets) and the full build order: docs/RELEASING.md.
 name: Build runtime
+run-name: ${{ inputs.runtime }} (${{ inputs.publish && 'publish' || 'dry run' }})
 
 on:
   workflow_dispatch:
