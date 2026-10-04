@@ -180,7 +180,10 @@ case "$runtime_id" in
         require_tool cmake
         cmake_command=cmake
         ctest_command=ctest
-        mysql_options=("-DDOWNLOAD_BOOST=OFF")
+        # The bundled libevent finds pipe2 by linking against the SDK, where
+        # it exists from macOS 27 on; the X plugin would then call a function
+        # older supported macOS versions lack.
+        mysql_options=("-DDOWNLOAD_BOOST=OFF" "-DEVENT__HAVE_PIPE2=0")
         if [[ "$runtime_id" == "mysql-5.7" ]]; then
             require_tool cmake-legacy
             cmake_command=cmake-legacy
