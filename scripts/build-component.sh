@@ -222,6 +222,16 @@ case "$runtime_id" in
             mkdir -p "$fixture_parent"
             mv "$prefix/mysql-test" "$fixture_parent/$runtime_id-$(date +%Y%m%d-%H%M%S)"
         fi
+        # Test programs and plugins from the upstream suite: DevStack never
+        # runs them and a configured server never loads them.
+        for program in mysqltest mysqltest_safe_process mysqltest_embedded mysqlxtest mysql_client_test \
+            mysql_client_test_embedded mysql_embedded mysql_keyring_encryption_test mysql_test_event_tracking comp_err; do
+            rm -f "$prefix/bin/$program"
+        done
+        rm -rf "$prefix/lib/plugin/debug"
+        find "$prefix/lib/plugin" -maxdepth 1 -type f \( -name 'component_test_*' -o -name 'libtest_*' -o -name 'test_*' \
+            -o -name '*example*' -o -name 'qa_*' -o -name 'auth_test*' -o -name 'component_udf_reg_*' -o -name 'component_udf_unreg_*' \
+            -o -name 'component_log_sink_test*' -o -name 'conflicting_variables*' -o -name 'ha_mock*' \) -delete
         mkdir -p "$prefix/lib"
         find "$output_root/openssl-3.5/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
