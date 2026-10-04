@@ -1,0 +1,28 @@
+# PHP tests that fail for reasons outside the runtime build, each with its
+# reason. The PHP recipe stops on any failure not listed here; a listed test
+# may also pass. check-php-tests.py reads this file.
+#
+# Columns: PHP runtimes (comma-separated), test, reason.
+
+# macOS's iconv (the system library PHP is built against) handles invalid
+# input and transliteration differently from GNU libiconv, which these tests
+# expect. Upstream's macOS CI builds against GNU libiconv instead.
+php-8.4,php-8.5  ext/iconv/tests/bug52211.phpt      macOS iconv: returns a partial string on invalid input
+php-8.4,php-8.5  ext/iconv/tests/iconv_strpos.phpt  macOS iconv: different result for an invalid sequence
+php-8.4,php-8.5  ext/iconv/tests/iconv_strrpos.phpt macOS iconv: different result for an invalid sequence
+php-8.4,php-8.5  ext/iconv/tests/iconv_substr.phpt  macOS iconv: different result for an invalid sequence
+php-8.4,php-8.5  ext/iconv/tests/translit-utf8.phpt macOS iconv: different transliteration of UTF-8 quotes
+
+# Upstream test bug: it lists only pdo under EXTENSIONS, so it runs without
+# pdo_pgsql, which build-postgresql-extensions.sh builds after the suite.
+php-8.5  ext/pdo_pgsql/tests/transations_deprecations.phpt  needs pdo_pgsql, built after the suite
+
+# GitHub's runners pass the test's IPv6 check but can't set the multicast
+# interface.
+php-8.4,php-8.5  ext/sockets/tests/mcast_ipv6_send.phpt  no IPv6 multicast interface on the build machine
+
+# The test's socket path (the build folder plus a long name) exceeds macOS's
+# 104-byte limit inside the folder part, so FPM's shortened path cannot be
+# created there. FPM handles it alike in 8.4 and 8.5; 8.5's copy of the
+# test tolerates it.
+php-8.4  sapi/fpm/tests/socket-uds-too-long-filename-start.phpt  build folder path longer than the socket path limit
