@@ -24,13 +24,13 @@ Every dependency is built with its upstream test suite and the results are recor
 
 For a preview payload, `DEVSTACK_DEFER_TEST_SUITES=1` skips the long PHP, PHP-extension, and MySQL suites; their build directories are preserved so the suites can be re-run before release. OpenSSL's suite always runs because dependent runtimes must be built against a passing OpenSSL.
 
-PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.9 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
+PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.9 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.x/MySQL 8.4 product from being packaged.
 
 A release runs all applicable upstream test suites, the two feasibility gates, runtime auditing, signing, notarization, and DevStack's own runtime checks against the result.
 
 ## Current development build and safe verification
 
-The default payload includes Apache, Nginx (disabled by default), PHP 8.4/8.5, MySQL 8.4, PostgreSQL 18.6, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
+The default payload includes Apache, Nginx (disabled by default), PHP 8.0–8.5, MySQL 8.4, PostgreSQL 18.6, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
 
 Packaging success is not full upstream acceptance: the release pipeline signs, notarizes and staples the image, while upstream suites and clean-machine acceptance remain separate work. Keep the packaging log as evidence; `.build/logs/package-latest.log` records the last run.
 
@@ -42,7 +42,7 @@ Preview/release app replacements use staged directories and recoverable previous
 
 ## PostgreSQL and PHP drivers
 
-Build `postgresql-18` with `DEVSTACK_BUILD_JOBS=2 scripts/build-runtimes.sh postgresql-18`. The recipe uses the existing OpenSSL and ICU dependency prefixes, includes libedit support, and installs contrib extensions such as pgcrypto and citext. Then run `DEVSTACK_BUILD_JOBS=2 scripts/build-postgresql-extensions.sh` to build ABI-specific pgsql and pdo_pgsql modules from the already verified PHP 8.4/8.5 source trees. libpq is copied into each PHP runtime; relocation and runtime auditing follow. The full Adminer English build replaces the MySQL-only build.
+Build `postgresql-18` with `DEVSTACK_BUILD_JOBS=2 scripts/build-runtimes.sh postgresql-18`. The recipe uses the existing OpenSSL and ICU dependency prefixes, includes libedit support, and installs contrib extensions such as pgcrypto and citext. Then run `DEVSTACK_BUILD_JOBS=2 scripts/build-postgresql-extensions.sh` to build ABI-specific pgsql and pdo_pgsql modules from the already verified PHP 8.0–8.5 source trees. libpq is copied into each PHP runtime; relocation and runtime auditing follow. The full Adminer English build replaces the MySQL-only build.
 
 PostgreSQL initializes a private cluster under Application Support/DevStack/Databases/postgresql-18. It binds only 127.0.0.1:5432, uses SCRAM authentication for TCP and sockets, and supports TLS using postgresql.localhost's managed certificate. Explicit shared-data, library, configuration, and client credential paths keep the shipped runtime independent of its build prefix.
 

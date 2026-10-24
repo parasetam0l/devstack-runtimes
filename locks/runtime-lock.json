@@ -1449,7 +1449,7 @@
           },
           {
             "url": "patches/php-8.0.30-icu-78.patch",
-            "sha256": "161a2f5e103710d2b06b5f402958d98201e63852bf9c31fd25e5e1f762b6032f",
+            "sha256": "7ffa96810ffd007629fa5ea6210c2575a5c688b00bf8eb1ce3e834df5de62417",
             "patches": []
           }
         ]
