@@ -48,6 +48,11 @@ php-8.0,php-8.1  ext/standard/tests/streams/opendir-004.phpt expired FTPS fixtur
 # test parses; 8.2 and later expect the longer list.
 php-8.0,php-8.1  ext/openssl/tests/openssl_x509_parse_basic.phpt  OpenSSL 3.5 adds the codesign purpose
 
+# PHP 8.0 reached its end of life in 2022. Its suite asserts the ICU, OpenSSL
+# and runner streams of that era; dozens of intl data tests fail against ICU 78
+# without a fault in the build. Its failures are recorded like PHP 7.4's.
+php-8.0  *  end-of-life runtime, failures recorded
+
 # PHP 7.4 reached its end of life in 2022. Its suite asserts that era's ICU,
 # OpenSSL, curl and terminals, and dozens of tests fail against the bundled
 # ICU 78 and OpenSSL 3.5 without a fault in the build. Its failures are
