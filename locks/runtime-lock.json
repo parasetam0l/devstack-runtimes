@@ -1376,7 +1376,9 @@
       "source": {
         "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
         "sha256": "216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9",
-        "patches": []
+        "patches": [
+          "php-8.0.30-openssl-3.5.patch"
+        ]
       },
       "supportState": "end-of-life",
       "dependencyPaths": [
@@ -1438,7 +1440,13 @@
           "macOS-libcurl",
           "macOS-sqlite3"
         ],
-        "patchSources": []
+        "patchSources": [
+          {
+            "url": "patches/php-8.0.30-openssl-3.5.patch",
+            "sha256": "416ec20121d9a2fd063c1da78fce6c24dd1ccc1ef60351b84f65d2aa0e808e01",
+            "patches": []
+          }
+        ]
       }
     },
     {

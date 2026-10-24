@@ -34,6 +34,20 @@ if [[ -f "$destination" ]]; then
     rm -f "$destination"
 fi
 
+# Patches that ship with this repository name a path instead of a URL.
+if [[ $# -eq 3 && "$url" != http://* && "$url" != https://* ]]; then
+    source_file="$repository_root/$url"
+    [[ -f "$source_file" ]] || { echo "Source is missing from the repository: $url" >&2; exit 66; }
+    actual_sha256="$(/usr/bin/shasum -a 256 "$source_file" | /usr/bin/awk '{print $1}')"
+    if [[ "$actual_sha256" != "$expected_sha256" ]]; then
+        echo "SHA-256 mismatch for $url: expected $expected_sha256, got $actual_sha256" >&2
+        exit 65
+    fi
+    cp "$source_file" "$destination"
+    printf '%s\n' "$destination"
+    exit 0
+fi
+
 # Projects move superseded releases (cdn.mysql.com to /archives, for
 # example); the lock may list mirrors, tried in order with the same hash.
 candidates=("$url")

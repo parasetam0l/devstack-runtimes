@@ -63,11 +63,12 @@ for runtime_id in "${requested[@]}"; do
         *) extract_source "$archive" "$component_work/source" ;;
     esac
 
-    if [[ "$runtime_id" == "php-7.4" ]]; then
+    while IFS=$'\t' read -r patch_runtime_id patch_index; do
+        [[ "$patch_runtime_id" == "$runtime_id" ]] || continue
         # Cached and SHA-256 checked like the source archive.
-        patch_file="$("$repository_root/scripts/fetch-runtime.sh" php-7.4 "$cache_directory" 0)"
+        patch_file="$("$repository_root/scripts/fetch-runtime.sh" "$runtime_id" "$cache_directory" "$patch_index")"
         /usr/bin/patch -d "$component_work/source" -p1 < "$patch_file"
-    fi
+    done <<< "$("$repository_root/scripts/runtime-lock.py" patches)"
 
     DEVSTACK_REPOSITORY_ROOT="$repository_root" \
     DEVSTACK_RUNTIME_ID="$runtime_id" \

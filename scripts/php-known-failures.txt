@@ -24,9 +24,29 @@ php-8.0,php-8.1,php-8.2,php-8.3,php-8.4,php-8.5  ext/sockets/tests/mcast_ipv6_se
 
 # The test's socket path (the build folder plus a long name) exceeds macOS's
 # 104-byte limit inside the folder part, so FPM's shortened path cannot be
-# created there. FPM handles it alike in 8.4 and 8.5; 8.5's copy of the
-# test tolerates it.
-php-8.4  sapi/fpm/tests/socket-uds-too-long-filename-start.phpt  build folder path longer than the socket path limit
+# created there. FPM handles it alike in 8.3 and 8.4; 8.5's copy of the test
+# tolerates it.
+php-8.3,php-8.4  sapi/fpm/tests/socket-uds-too-long-filename-start.phpt  build folder path longer than the socket path limit
+
+# The stream_isatty tests expect the harness to have redirected stdin and
+# stderr; on the GitHub runner those streams stay TTYs for the older suites.
+php-8.0,php-8.1,php-8.2  tests/output/stream_isatty_err.phpt      runner streams are not the TTYs the test expects
+php-8.0,php-8.1,php-8.2  tests/output/stream_isatty_in-err.phpt   runner streams are not the TTYs the test expects
+php-8.0,php-8.1,php-8.2  tests/output/stream_isatty_in-out.phpt   runner streams are not the TTYs the test expects
+php-8.0,php-8.1,php-8.2  tests/output/stream_isatty_out-err.phpt  runner streams are not the TTYs the test expects
+php-8.0,php-8.1,php-8.2  tests/output/stream_isatty_out.phpt      runner streams are not the TTYs the test expects
+
+# The fixed test certificates in PHP 8.0 and 8.1 expired, and OpenSSL 3.5
+# verifies them strictly; 8.2 and later carry renewed certificates.
+php-8.0,php-8.1  ext/openssl/tests/bug74341.phpt             OpenSSL 3.5 rejects the test certificate's UTCTime without seconds
+php-8.0,php-8.1  ext/openssl/tests/sni_server.phpt           expired fixture certificate
+php-8.0,php-8.1  ext/openssl/tests/sni_server_key_cert.phpt  expired fixture certificate
+php-8.0,php-8.1  ext/standard/tests/streams/opendir-003.phpt expired FTPS fixture certificate
+php-8.0,php-8.1  ext/standard/tests/streams/opendir-004.phpt expired FTPS fixture certificate
+
+# OpenSSL 3.5 reports an extra "codesign" purpose for the certificate the
+# test parses; 8.2 and later expect the longer list.
+php-8.0,php-8.1  ext/openssl/tests/openssl_x509_parse_basic.phpt  OpenSSL 3.5 adds the codesign purpose
 
 # PHP 7.4 reached its end of life in 2022. Its suite asserts that era's ICU,
 # OpenSSL, curl and terminals, and dozens of tests fail against the bundled
