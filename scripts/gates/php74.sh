@@ -14,7 +14,7 @@ build_directory="$work_root/php-7.4/build"
 "$php" -n -r '
 if (PHP_VERSION !== "7.4.33") exit(10);
 if (!extension_loaded("openssl")) exit(11);
-if (strpos(OPENSSL_VERSION_TEXT, "OpenSSL 3.5.8") === false) exit(12);
+if (strpos(OPENSSL_VERSION_TEXT, "OpenSSL 3.5.9") === false) exit(12);
 $key = openssl_pkey_new(["private_key_type" => OPENSSL_KEYTYPE_RSA, "private_key_bits" => 2048]);
 if ($key === false) exit(13);
 $data = "devstack-openssl-gate";
@@ -39,7 +39,7 @@ if [[ ! -f "$build_directory/Makefile" ]]; then
 fi
 
 # Tests frozen with PHP 7.4 that assert behavior of older libraries. The
-# runtime links the system libcurl (8.7, SecureTransport) and OpenSSL 3.5.8,
+# runtime links the system libcurl (8.7, SecureTransport) and OpenSSL 3.5.9,
 # so these expectations no longer hold; everything else must still pass:
 #   curl: libcurl 8 error strings/errno and the removal of HTTP/2 server push
 #   openssl: strict UTCTime parsing, the new codesign extension, and RSA
@@ -108,4 +108,4 @@ for extension_name in xdebug redis imagick; do
     "$php" -n -d "$directive=$extension" --ri "$extension_name" >/dev/null
 done
 
-echo "PHP 7.4/OpenSSL 3.5.8 feasibility gate passed."
+echo "PHP 7.4/OpenSSL 3.5.9 feasibility gate passed."

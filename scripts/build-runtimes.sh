@@ -24,7 +24,7 @@ requested=("$@")
 build_everything=0
 if [[ ${#requested[@]} -eq 0 || "${requested[0]}" == "all" ]]; then
     build_everything=1
-    requested=(openssl-3.5 imagemagick-7.1 apache-2.4 php-8.5 php-8.4 nginx-1.30 postgresql-18 adminer-6.1.1 mysql-8.4 phpmyadmin-5.2.3 mailpit-1.31.1 composer-2.10.3 php-7.4 xdebug-php85 xdebug-php84 redis-php imagick-php xdebug-php74 mysql-5.7)
+    requested=(openssl-3.5 imagemagick-7.1 apache-2.4 php-8.5 php-8.4 nginx-1.30 postgresql-18 adminer-6.2.0 mysql-8.4 phpmyadmin-5.2.3 mailpit-1.32.0 composer-2.10.3 php-7.4 xdebug-php85 xdebug-php84 redis-php imagick-php xdebug-php74 mysql-5.7)
 fi
 
 mkdir -p "$cache_directory" "$work_root" "$output_root" "$dependency_root"

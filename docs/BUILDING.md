@@ -24,7 +24,7 @@ Every dependency is built with its upstream test suite and the results are recor
 
 For a preview payload, `DEVSTACK_DEFER_TEST_SUITES=1` skips the long PHP, PHP-extension, and MySQL suites; their build directories are preserved so the suites can be re-run before release. OpenSSL's suite always runs because dependent runtimes must be built against a passing OpenSSL.
 
-PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.8 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
+PHP 7.4 is copied to the final payload only after its native ARM64/OpenSSL 3.5.9 gate succeeds. MySQL 5.7 follows the same fail-closed rule. A failed legacy gate does not prevent the PHP 8.5/MySQL 8.4 product from being packaged.
 
 A release runs all applicable upstream test suites, the two feasibility gates, runtime auditing, signing, notarization, and DevStack's own runtime checks against the result.
 

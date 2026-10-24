@@ -4,7 +4,7 @@
     {
       "id": "openssl-3.5",
       "kind": "openssl",
-      "version": "3.5.8",
+      "version": "3.5.9",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -15,8 +15,8 @@
       "hashes": {},
       "license": "Apache-2.0",
       "source": {
-        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.8/openssl-3.5.8.tar.gz",
-        "sha256": "a8f84a39918ec6415ce765d9b429d313ba97b8143169c172e734b9514464f5b2",
+        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz",
+        "sha256": "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a",
         "patches": []
       },
       "supportState": "supported",
@@ -42,7 +42,7 @@
     {
       "id": "apache-2.4",
       "kind": "apache",
-      "version": "2.4.68",
+      "version": "2.4.69",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -54,8 +54,8 @@
       "hashes": {},
       "license": "Apache-2.0",
       "source": {
-        "url": "https://archive.apache.org/dist/httpd/httpd-2.4.68.tar.bz2",
-        "sha256": "68c74d4df38c26bed4dfbdb8f3baf1eb532f3872357becc1bba5d136f6b63c06",
+        "url": "https://archive.apache.org/dist/httpd/httpd-2.4.69.tar.bz2",
+        "sha256": "c5e6ebc66e349b87d7fc6916ae7cc2a808ed348003de134cf9e9d89d3e2cc73d",
         "patches": []
       },
       "supportState": "supported",
@@ -93,7 +93,7 @@
       "id": "php-7.4",
       "kind": "php",
       "version": "7.4.33",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20190902-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -335,7 +335,7 @@
     {
       "id": "php-8.5",
       "kind": "php",
-      "version": "8.5.11",
+      "version": "8.5.12",
       "packRevision": 1,
       "abi": "20250925-nts",
       "architecture": "arm64",
@@ -509,8 +509,8 @@
       "hashes": {},
       "license": "PHP-3.01",
       "source": {
-        "url": "https://www.php.net/distributions/php-8.5.11.tar.xz",
-        "sha256": "d9be75c08e8c316f4c8f4194d8fbe1750a15f6a6d9d4e3fe72082abeeb800360",
+        "url": "https://www.php.net/distributions/php-8.5.12.tar.xz",
+        "sha256": "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209",
         "patches": []
       },
       "supportState": "supported",
@@ -580,7 +580,7 @@
       "id": "mysql-5.7",
       "kind": "mysql",
       "version": "5.7.44",
-      "packRevision": 1,
+      "packRevision": 2,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
       "entryPoints": {
@@ -624,7 +624,7 @@
     {
       "id": "mysql-8.4",
       "kind": "mysql",
-      "version": "8.4.11",
+      "version": "8.4.13",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -638,11 +638,8 @@
       "hashes": {},
       "license": "GPL-2.0-only WITH Universal-FOSS-exception-1.0",
       "source": {
-        "url": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.11.tar.gz",
-        "mirrors": [
-          "https://cdn.mysql.com/archives/mysql-8.4/mysql-8.4.11.tar.gz"
-        ],
-        "sha256": "eb3051164d625dd346a8203f76e0d5d5d9aec51dbe9d51788e39ec6b3f1394c2",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.4/mysql-8.4.13.tar.gz",
+        "sha256": "f6ddc7f7fb6462bab8b533b13c06af3fff57fa9ca12259b81ab13cd9930b9d58",
         "patches": []
       },
       "supportState": "supported",
@@ -701,9 +698,9 @@
       }
     },
     {
-      "id": "mailpit-1.31.1",
+      "id": "mailpit-1.32.0",
       "kind": "mailpit",
-      "version": "1.31.1",
+      "version": "1.32.0",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -714,8 +711,8 @@
       "hashes": {},
       "license": "MIT",
       "source": {
-        "url": "https://github.com/axllent/mailpit/releases/download/v1.31.1/mailpit-darwin-arm64.tar.gz",
-        "sha256": "71c10f33f36c78a2864c4df906f11736b092a80ad1371742bd4e90e65d778e1b",
+        "url": "https://github.com/axllent/mailpit/releases/download/v1.32.0/mailpit-darwin-arm64.tar.gz",
+        "sha256": "23709bd727f20da2290de6a2a40c4685c48a3127586d77370efd1a3a595f9ef6",
         "patches": []
       },
       "supportState": "supported",
@@ -766,8 +763,8 @@
     {
       "id": "imagemagick-7.1",
       "kind": "library",
-      "version": "7.1.2-32",
-      "packRevision": 2,
+      "version": "7.1.2-34",
+      "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
       "entryPoints": {
@@ -777,8 +774,8 @@
       "hashes": {},
       "license": "ImageMagick",
       "source": {
-        "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-32/ImageMagick-7.1.2-32.tar.xz",
-        "sha256": "abc38dad4adfbab671857822499e69c8745278a914f5d38517baecd400b820c2",
+        "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-34/ImageMagick-7.1.2-34.tar.xz",
+        "sha256": "55fe0ec246245b46c429f9e6bc65294ad4a78a66b88abd9817971ca157856323",
         "patches": [
           "scripts/prepare-imagemagick.py"
         ]
@@ -951,7 +948,7 @@
     {
       "id": "php-8.4",
       "kind": "php",
-      "version": "8.4.26",
+      "version": "8.4.27",
       "packRevision": 1,
       "abi": "20240924-nts",
       "architecture": "arm64",
@@ -1125,8 +1122,8 @@
       "hashes": {},
       "license": "PHP-3.01",
       "source": {
-        "url": "https://www.php.net/distributions/php-8.4.26.tar.xz",
-        "sha256": "32a2de53862ad44ed4a5005244ce4f1b50c271e74dced215449a4443b40569f1",
+        "url": "https://www.php.net/distributions/php-8.4.27.tar.xz",
+        "sha256": "dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0",
         "patches": []
       },
       "supportState": "supported",
@@ -1228,7 +1225,7 @@
     {
       "id": "nginx-1.30",
       "kind": "nginx",
-      "version": "1.30.5",
+      "version": "1.30.6",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1239,8 +1236,8 @@
       "hashes": {},
       "license": "BSD-2-Clause",
       "source": {
-        "url": "https://nginx.org/download/nginx-1.30.5.tar.gz",
-        "sha256": "6c20565aa2325cb82216ae804f4a4ff1875179014759a381c42ddc8e11c4906d",
+        "url": "https://nginx.org/download/nginx-1.30.6.tar.gz",
+        "sha256": "3cf46f5ed7504d460125866b7bea99fb357f31d887e2e63b35503310e9b8b6c8",
         "patches": []
       },
       "supportState": "supported",
@@ -1265,9 +1262,9 @@
       }
     },
     {
-      "id": "adminer-6.1.1",
+      "id": "adminer-6.2.0",
       "kind": "adminer",
-      "version": "6.1.1",
+      "version": "6.2.0",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1278,8 +1275,8 @@
       "hashes": {},
       "license": "Apache-2.0 OR GPL-2.0-only",
       "source": {
-        "url": "https://github.com/vrana/adminer/releases/download/v6.1.1/adminer-6.1.1-en.php",
-        "sha256": "d2cbf80da00f7630304477b4a09f1bd2212bc6c4a53c71df1520a8afce3dc865",
+        "url": "https://github.com/vrana/adminer/releases/download/v6.2.0/adminer-6.2.0-en.php",
+        "sha256": "a1f521b93070bc3298f3a137786c4520496adfad536f312e80a898247e3bf3ae",
         "patches": []
       },
       "supportState": "supported",
@@ -1300,7 +1297,7 @@
       "id": "postgresql-18",
       "kind": "postgresql",
       "version": "18.6",
-      "packRevision": 2,
+      "packRevision": 3,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
       "entryPoints": {

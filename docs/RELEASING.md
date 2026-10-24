@@ -2,7 +2,7 @@
 
 Each runtime ships as its own **pack**: a signed archive that DevStack
 downloads, verifies and installs during setup or from its Runtimes tab. A
-pack release is named after the pack, for example `php-8.5-8.5.11-r1`, and
+pack release is named after the pack, for example `php-8.5-8.5.12-r1`, and
 holds:
 
 | Asset | What it is |
@@ -75,10 +75,10 @@ them instead of rebuilding them:
 
 | Order | Runtimes |
 | --- | --- |
-| 1 | `openssl-3.5`, `imagemagick-7.1`, `mailpit-1.31.1`, `phpmyadmin-5.2.3`, `composer-2.10.3` |
+| 1 | `openssl-3.5`, `imagemagick-7.1`, `mailpit-1.32.0`, `phpmyadmin-5.2.3`, `composer-2.10.3` |
 | 2 | `postgresql-18`, `apache-2.4`, `nginx-1.30`, `mysql-8.4`, `mysql-5.7` |
 | 3 | `php-8.5`, `php-8.4`, `php-7.4` |
-| 4 | `adminer-6.1.1` |
+| 4 | `adminer-6.2.0` |
 
 PHP 7.4 and MySQL 5.7 publish only when their feasibility gate passes.
 

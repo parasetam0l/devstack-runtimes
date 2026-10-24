@@ -3,7 +3,7 @@
 
   ci-build-plan.py RUNTIME_ID
 
-  name=php-8.5-8.5.11-r1           the pack and release name
+  name=php-8.5-8.5.12-r1           the pack and release name
   dependencies=php                 shared library trees for build-dependencies.sh
   inputs=openssl-3.5 imagemagick-7.1 postgresql-18
                                    published packs installed before building
@@ -36,7 +36,7 @@ DEPENDENCY_TREES = {
 BUILD_ONLY_INPUTS = {
     "php-8.4": ["postgresql-18"],
     "php-8.5": ["postgresql-18"],
-    "adminer-6.1.1": ["php-8.5"],
+    "adminer-6.2.0": ["php-8.5"],
 }
 POSTGRESQL_DRIVERS = {"php-8.4", "php-8.5"}
 

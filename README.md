@@ -10,24 +10,24 @@ Built runtimes are published here as signed, notarized runtime packs that DevSta
 
 | ID | Software | Version | Licence | Note |
 | --- | --- | --- | --- | --- |
-| `openssl-3.5` | OpenSSL | 3.5.8 | Apache-2.0 |  |
-| `apache-2.4` | Apache HTTP Server | 2.4.68 | Apache-2.0 |  |
+| `openssl-3.5` | OpenSSL | 3.5.9 | Apache-2.0 |  |
+| `apache-2.4` | Apache HTTP Server | 2.4.69 | Apache-2.0 |  |
 | `php-7.4` | PHP | 7.4.33 | PHP-3.01 | legacy, optional |
-| `php-8.5` | PHP | 8.5.11 | PHP-3.01 |  |
+| `php-8.5` | PHP | 8.5.12 | PHP-3.01 |  |
 | `mysql-5.7` | MySQL | 5.7.44 | GPL-2.0-only WITH Universal-FOSS-exception-1.0 | legacy, optional |
-| `mysql-8.4` | MySQL | 8.4.11 | GPL-2.0-only WITH Universal-FOSS-exception-1.0 |  |
+| `mysql-8.4` | MySQL | 8.4.13 | GPL-2.0-only WITH Universal-FOSS-exception-1.0 |  |
 | `phpmyadmin-5.2.3` | phpMyAdmin | 5.2.3 | GPL-2.0-only |  |
-| `mailpit-1.31.1` | Mailpit | 1.31.1 | MIT |  |
+| `mailpit-1.32.0` | Mailpit | 1.32.0 | MIT |  |
 | `composer-2.10.3` | Composer | 2.10.3 | MIT |  |
-| `imagemagick-7.1` | ImageMagick | 7.1.2-32 | ImageMagick |  |
+| `imagemagick-7.1` | ImageMagick | 7.1.2-34 | ImageMagick |  |
 | `xdebug-php74` | Xdebug (PHP extension) | 3.1.6 | Xdebug-1.03 | legacy, optional |
 | `xdebug-php85` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 |  |
 | `redis-php` | Redis (PHP extension) | 6.3.0 | PHP-3.01 |  |
 | `imagick-php` | Imagick (PHP extension) | 3.8.1 | PHP-3.01 |  |
-| `php-8.4` | PHP | 8.4.26 | PHP-3.01 |  |
+| `php-8.4` | PHP | 8.4.27 | PHP-3.01 |  |
 | `xdebug-php84` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 |  |
-| `nginx-1.30` | Nginx | 1.30.5 | BSD-2-Clause |  |
-| `adminer-6.1.1` | Adminer | 6.1.1 | Apache-2.0 OR GPL-2.0-only |  |
+| `nginx-1.30` | Nginx | 1.30.6 | BSD-2-Clause |  |
+| `adminer-6.2.0` | Adminer | 6.2.0 | Apache-2.0 OR GPL-2.0-only |  |
 | `postgresql-18` | PostgreSQL | 18.6 | PostgreSQL |  |
 
 The exact source URL and SHA-256 of each one is in [`locks/runtime-lock.json`](locks/runtime-lock.json); the libraries they link against are in [`locks/dependency-lock.json`](locks/dependency-lock.json).

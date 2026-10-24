@@ -298,7 +298,7 @@ case "$runtime_id" in
         find "$output_root/openssl-3.5/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$prefix/lib/" \;
         find "$dependencies/lib" -maxdepth 1 -name 'libpcre2-8*.dylib' -exec cp -R {} "$prefix/lib/" \;
         ;;
-    adminer-6.1.1)
+    adminer-6.2.0)
         mkdir -p "$prefix"
         cp "$source_directory/adminer.php" "$prefix/index.php"
         "$output_root/php-8.5/bin/php" -n -l "$prefix/index.php"
@@ -309,7 +309,7 @@ case "$runtime_id" in
         cp -R "$source_directory/." "$prefix/"
         /usr/bin/python3 "$recipe_directory/configure-phpmyadmin.py" "$prefix"
         ;;
-    mailpit-1.31.1)
+    mailpit-1.32.0)
         rm -rf "$prefix"
         mkdir -p "$prefix"
         mailpit_binary="$(find "$source_directory" -type f -name mailpit -maxdepth 2 -print -quit)"
