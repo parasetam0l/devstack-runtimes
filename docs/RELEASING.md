@@ -77,7 +77,7 @@ them instead of rebuilding them:
 | --- | --- |
 | 1 | `openssl-3.5`, `imagemagick-7.1`, `mailpit-1.32.0`, `phpmyadmin-5.2.3`, `composer-2.10.3` |
 | 2 | `postgresql-18`, `apache-2.4`, `nginx-1.30`, `mysql-8.4`, `mysql-5.7` |
-| 3 | `php-8.5`, `php-8.4`, `php-7.4` |
+| 3 | `php-8.5`, `php-8.4`, `php-8.3`, `php-8.2`, `php-8.1`, `php-8.0`, `php-7.4` |
 | 4 | `adminer-6.2.0` |
 
 PHP 7.4 and MySQL 5.7 publish only when their feasibility gate passes.

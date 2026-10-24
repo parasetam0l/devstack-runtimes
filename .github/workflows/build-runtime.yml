@@ -27,6 +27,10 @@ on:
           - postgresql-18
           - php-8.5
           - php-8.4
+          - php-8.3
+          - php-8.2
+          - php-8.1
+          - php-8.0
           - php-7.4
           - apache-2.4
           - nginx-1.30
@@ -70,6 +74,9 @@ jobs:
       # CPU seconds per process, the test runner included: PHP 7.4's runner
       # needs more than a minute for its suite on the runner's cores.
       DEVSTACK_TEST_CPU_SECONDS: "600"
+      # Wall-clock limit for one suite. PHP 7.4's 15k tests need about 20
+      # minutes on the runner's cores; leave headroom for a slow runner.
+      DEVSTACK_TEST_SECONDS: "1800"
       PACK_KEY_ID: devstack-release-1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

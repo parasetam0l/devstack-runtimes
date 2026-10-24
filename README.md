@@ -25,7 +25,15 @@ Built runtimes are published here as signed, notarized runtime packs that DevSta
 | `redis-php` | Redis (PHP extension) | 6.3.0 | PHP-3.01 |  |
 | `imagick-php` | Imagick (PHP extension) | 3.8.1 | PHP-3.01 |  |
 | `php-8.4` | PHP | 8.4.27 | PHP-3.01 |  |
+| `php-8.3` | PHP | 8.3.36 | PHP-3.01 | security fixes only, optional |
+| `php-8.2` | PHP | 8.2.35 | PHP-3.01 | security fixes only, optional |
+| `php-8.1` | PHP | 8.1.34 | PHP-3.01 | end-of-life, optional |
+| `php-8.0` | PHP | 8.0.30 | PHP-3.01 | end-of-life, optional |
 | `xdebug-php84` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 |  |
+| `xdebug-php83` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | security fixes only, optional |
+| `xdebug-php82` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | security fixes only, optional |
+| `xdebug-php81` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | end-of-life, optional |
+| `xdebug-php80` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | end-of-life, optional |
 | `nginx-1.30` | Nginx | 1.30.6 | BSD-2-Clause |  |
 | `adminer-6.2.0` | Adminer | 6.2.0 | Apache-2.0 OR GPL-2.0-only |  |
 | `postgresql-18` | PostgreSQL | 18.6 | PostgreSQL |  |

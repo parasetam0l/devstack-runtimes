@@ -899,8 +899,12 @@
         "environment": {},
         "dependencies": [
           "php-7.4",
-          "php-8.5",
-          "php-8.4"
+          "php-8.0",
+          "php-8.1",
+          "php-8.2",
+          "php-8.3",
+          "php-8.4",
+          "php-8.5"
         ],
         "patchSources": []
       }
@@ -938,9 +942,13 @@
         "environment": {},
         "dependencies": [
           "php-7.4",
+          "php-8.0",
+          "php-8.1",
+          "php-8.2",
+          "php-8.3",
+          "php-8.4",
           "php-8.5",
-          "imagemagick-7.1",
-          "php-8.4"
+          "imagemagick-7.1"
         ],
         "patchSources": []
       }
@@ -1190,6 +1198,982 @@
       }
     },
     {
+      "id": "php-8.0",
+      "kind": "php",
+      "version": "8.0.30",
+      "packRevision": 1,
+      "abi": "20200930-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "php": "bin/php",
+        "php-fpm": "sbin/php-fpm",
+        "phpize": "bin/phpize",
+        "php-config": "bin/php-config"
+      },
+      "extensions": [
+        {
+          "name": "bcmath",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "bz2",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "calendar",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "curl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "dom",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "exif",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "fileinfo",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "ftp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gd",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gettext",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gmp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "intl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mbstring",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mysqli",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "opcache",
+          "enabledByDefault": true,
+          "zendExtension": true
+        },
+        {
+          "name": "pcntl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_mysql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_sqlite",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "soap",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sockets",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sodium",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sqlite3",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "tidy",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xml",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xsl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "zip",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xdebug",
+          "version": "3.5.3",
+          "enabledByDefault": false,
+          "zendExtension": true
+        },
+        {
+          "name": "redis",
+          "version": "6.3.0",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "imagick",
+          "version": "3.8.1",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
+        "sha256": "216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9",
+        "patches": []
+      },
+      "supportState": "end-of-life",
+      "dependencyPaths": [
+        "@rpath/libssl.3.dylib",
+        "@rpath/libcrypto.3.dylib",
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
+      ],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": [
+          "--disable-cgi",
+          "--enable-fpm",
+          "--enable-opcache",
+          "--enable-bcmath",
+          "--enable-calendar",
+          "--enable-exif",
+          "--enable-ftp",
+          "--enable-intl",
+          "--enable-mbstring",
+          "--enable-pcntl",
+          "--enable-soap",
+          "--enable-sockets",
+          "--with-bz2",
+          "--with-curl",
+          "--with-fpm-user=$USER",
+          "--with-fpm-group=staff",
+          "--with-gd",
+          "--with-gettext",
+          "--with-gmp",
+          "--with-mysqli=mysqlnd",
+          "--with-openssl",
+          "--with-pdo-mysql=mysqlnd",
+          "--with-pdo-sqlite",
+          "--with-sodium",
+          "--with-sqlite3",
+          "--with-tidy",
+          "--with-xsl",
+          "--with-zip"
+        ],
+        "environment": {
+          "MACOSX_DEPLOYMENT_TARGET": "15.0",
+          "ARCHFLAGS": "-arch arm64"
+        },
+        "dependencies": [
+          "openssl-3.5",
+          "imagemagick-7.1",
+          "zlib",
+          "libpng",
+          "icu",
+          "oniguruma",
+          "libzip",
+          "libsodium",
+          "gmp",
+          "tidy",
+          "gettext",
+          "macOS-libxml2",
+          "macOS-libxslt",
+          "macOS-libcurl",
+          "macOS-sqlite3"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "php-8.1",
+      "kind": "php",
+      "version": "8.1.34",
+      "packRevision": 1,
+      "abi": "20210902-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "php": "bin/php",
+        "php-fpm": "sbin/php-fpm",
+        "phpize": "bin/phpize",
+        "php-config": "bin/php-config"
+      },
+      "extensions": [
+        {
+          "name": "bcmath",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "bz2",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "calendar",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "curl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "dom",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "exif",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "fileinfo",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "ftp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gd",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gettext",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gmp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "intl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mbstring",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mysqli",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "opcache",
+          "enabledByDefault": true,
+          "zendExtension": true
+        },
+        {
+          "name": "pcntl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_mysql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_sqlite",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "soap",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sockets",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sodium",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sqlite3",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "tidy",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xml",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xsl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "zip",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xdebug",
+          "version": "3.5.3",
+          "enabledByDefault": false,
+          "zendExtension": true
+        },
+        {
+          "name": "redis",
+          "version": "6.3.0",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "imagick",
+          "version": "3.8.1",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-8.1.34.tar.xz",
+        "sha256": "ffa9e0982e82eeaea848f57687b425ed173aa278fe563001310ae2638db5c251",
+        "patches": []
+      },
+      "supportState": "end-of-life",
+      "dependencyPaths": [
+        "@rpath/libssl.3.dylib",
+        "@rpath/libcrypto.3.dylib",
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
+      ],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": [
+          "--disable-cgi",
+          "--enable-fpm",
+          "--enable-opcache",
+          "--enable-bcmath",
+          "--enable-calendar",
+          "--enable-exif",
+          "--enable-ftp",
+          "--enable-intl",
+          "--enable-mbstring",
+          "--enable-pcntl",
+          "--enable-soap",
+          "--enable-sockets",
+          "--with-bz2",
+          "--with-curl",
+          "--with-fpm-user=$USER",
+          "--with-fpm-group=staff",
+          "--with-gd",
+          "--with-gettext",
+          "--with-gmp",
+          "--with-mysqli=mysqlnd",
+          "--with-openssl",
+          "--with-pdo-mysql=mysqlnd",
+          "--with-pdo-sqlite",
+          "--with-sodium",
+          "--with-sqlite3",
+          "--with-tidy",
+          "--with-xsl",
+          "--with-zip"
+        ],
+        "environment": {
+          "MACOSX_DEPLOYMENT_TARGET": "15.0",
+          "ARCHFLAGS": "-arch arm64"
+        },
+        "dependencies": [
+          "openssl-3.5",
+          "imagemagick-7.1",
+          "zlib",
+          "libpng",
+          "icu",
+          "oniguruma",
+          "libzip",
+          "libsodium",
+          "gmp",
+          "tidy",
+          "gettext",
+          "macOS-libxml2",
+          "macOS-libxslt",
+          "macOS-libcurl",
+          "macOS-sqlite3"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "php-8.2",
+      "kind": "php",
+      "version": "8.2.35",
+      "packRevision": 1,
+      "abi": "20220829-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "php": "bin/php",
+        "php-fpm": "sbin/php-fpm",
+        "phpize": "bin/phpize",
+        "php-config": "bin/php-config"
+      },
+      "extensions": [
+        {
+          "name": "bcmath",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "bz2",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "calendar",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "curl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "dom",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "exif",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "fileinfo",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "ftp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gd",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gettext",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gmp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "intl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mbstring",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mysqli",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "opcache",
+          "enabledByDefault": true,
+          "zendExtension": true
+        },
+        {
+          "name": "pcntl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_mysql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_sqlite",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "soap",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sockets",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sodium",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sqlite3",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "tidy",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xml",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xsl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "zip",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xdebug",
+          "version": "3.5.3",
+          "enabledByDefault": false,
+          "zendExtension": true
+        },
+        {
+          "name": "redis",
+          "version": "6.3.0",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "imagick",
+          "version": "3.8.1",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-8.2.35.tar.xz",
+        "sha256": "5737b98601fe5ab1b8c5db0c82ed3158acb9283ed3081ffe2faffb9ac81455e6",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [
+        "@rpath/libssl.3.dylib",
+        "@rpath/libcrypto.3.dylib",
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
+      ],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": [
+          "--disable-cgi",
+          "--enable-fpm",
+          "--enable-opcache",
+          "--enable-bcmath",
+          "--enable-calendar",
+          "--enable-exif",
+          "--enable-ftp",
+          "--enable-intl",
+          "--enable-mbstring",
+          "--enable-pcntl",
+          "--enable-soap",
+          "--enable-sockets",
+          "--with-bz2",
+          "--with-curl",
+          "--with-fpm-user=$USER",
+          "--with-fpm-group=staff",
+          "--with-gd",
+          "--with-gettext",
+          "--with-gmp",
+          "--with-mysqli=mysqlnd",
+          "--with-openssl",
+          "--with-pdo-mysql=mysqlnd",
+          "--with-pdo-sqlite",
+          "--with-sodium",
+          "--with-sqlite3",
+          "--with-tidy",
+          "--with-xsl",
+          "--with-zip"
+        ],
+        "environment": {
+          "MACOSX_DEPLOYMENT_TARGET": "15.0",
+          "ARCHFLAGS": "-arch arm64"
+        },
+        "dependencies": [
+          "openssl-3.5",
+          "imagemagick-7.1",
+          "zlib",
+          "libpng",
+          "icu",
+          "oniguruma",
+          "libzip",
+          "libsodium",
+          "gmp",
+          "tidy",
+          "gettext",
+          "macOS-libxml2",
+          "macOS-libxslt",
+          "macOS-libcurl",
+          "macOS-sqlite3"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "php-8.3",
+      "kind": "php",
+      "version": "8.3.36",
+      "packRevision": 1,
+      "abi": "20230831-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "php": "bin/php",
+        "php-fpm": "sbin/php-fpm",
+        "phpize": "bin/phpize",
+        "php-config": "bin/php-config"
+      },
+      "extensions": [
+        {
+          "name": "bcmath",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "bz2",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "calendar",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "curl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "dom",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "exif",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "fileinfo",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "ftp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gd",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gettext",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "gmp",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "intl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mbstring",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "mysqli",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "opcache",
+          "enabledByDefault": true,
+          "zendExtension": true
+        },
+        {
+          "name": "pcntl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_mysql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_sqlite",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "soap",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sockets",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sodium",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "sqlite3",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "tidy",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xml",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xsl",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "zip",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "xdebug",
+          "version": "3.5.3",
+          "enabledByDefault": false,
+          "zendExtension": true
+        },
+        {
+          "name": "redis",
+          "version": "6.3.0",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "imagick",
+          "version": "3.8.1",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        },
+        {
+          "name": "pdo_pgsql",
+          "enabledByDefault": true,
+          "zendExtension": false
+        }
+      ],
+      "hashes": {},
+      "license": "PHP-3.01",
+      "source": {
+        "url": "https://www.php.net/distributions/php-8.3.36.tar.xz",
+        "sha256": "dd54693aa334c5c4d72e9aee96b082c2473750a18a6c1d105789c93a3b1692fd",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [
+        "@rpath/libssl.3.dylib",
+        "@rpath/libcrypto.3.dylib",
+        "@rpath/libMagickWand-7.Q16HDRI.10.dylib",
+        "postgresql-18"
+      ],
+      "build": {
+        "buildSystem": "configure/make",
+        "flags": [
+          "--disable-cgi",
+          "--enable-fpm",
+          "--enable-opcache",
+          "--enable-bcmath",
+          "--enable-calendar",
+          "--enable-exif",
+          "--enable-ftp",
+          "--enable-intl",
+          "--enable-mbstring",
+          "--enable-pcntl",
+          "--enable-soap",
+          "--enable-sockets",
+          "--with-bz2",
+          "--with-curl",
+          "--with-fpm-user=$USER",
+          "--with-fpm-group=staff",
+          "--with-gd",
+          "--with-gettext",
+          "--with-gmp",
+          "--with-mysqli=mysqlnd",
+          "--with-openssl",
+          "--with-pdo-mysql=mysqlnd",
+          "--with-pdo-sqlite",
+          "--with-sodium",
+          "--with-sqlite3",
+          "--with-tidy",
+          "--with-xsl",
+          "--with-zip"
+        ],
+        "environment": {
+          "MACOSX_DEPLOYMENT_TARGET": "15.0",
+          "ARCHFLAGS": "-arch arm64"
+        },
+        "dependencies": [
+          "openssl-3.5",
+          "imagemagick-7.1",
+          "zlib",
+          "libpng",
+          "icu",
+          "oniguruma",
+          "libzip",
+          "libsodium",
+          "gmp",
+          "tidy",
+          "gettext",
+          "macOS-libxml2",
+          "macOS-libxslt",
+          "macOS-libcurl",
+          "macOS-sqlite3"
+        ],
+        "patchSources": []
+      }
+    },
+    {
       "id": "xdebug-php84",
       "kind": "php-extension",
       "version": "3.5.3",
@@ -1218,6 +2202,138 @@
         "environment": {},
         "dependencies": [
           "php-8.4"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "xdebug-php80",
+      "kind": "php-extension",
+      "version": "3.5.3",
+      "packRevision": 1,
+      "abi": "20200930-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "extension": "lib/php/extensions/xdebug.so"
+      },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": {
+        "url": "https://github.com/xdebug/xdebug/archive/refs/tags/3.5.3.tar.gz",
+        "sha256": "954e56021668121ecc50b92d2ad1ce945f22ecf81ffc5bb5835219485b12ef5f",
+        "patches": []
+      },
+      "supportState": "end-of-life",
+      "dependencyPaths": [
+        "php-8.0"
+      ],
+      "build": {
+        "buildSystem": "phpize/configure/make",
+        "flags": [],
+        "environment": {},
+        "dependencies": [
+          "php-8.0"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "xdebug-php81",
+      "kind": "php-extension",
+      "version": "3.5.3",
+      "packRevision": 1,
+      "abi": "20210902-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "extension": "lib/php/extensions/xdebug.so"
+      },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": {
+        "url": "https://github.com/xdebug/xdebug/archive/refs/tags/3.5.3.tar.gz",
+        "sha256": "954e56021668121ecc50b92d2ad1ce945f22ecf81ffc5bb5835219485b12ef5f",
+        "patches": []
+      },
+      "supportState": "end-of-life",
+      "dependencyPaths": [
+        "php-8.1"
+      ],
+      "build": {
+        "buildSystem": "phpize/configure/make",
+        "flags": [],
+        "environment": {},
+        "dependencies": [
+          "php-8.1"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "xdebug-php82",
+      "kind": "php-extension",
+      "version": "3.5.3",
+      "packRevision": 1,
+      "abi": "20220829-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "extension": "lib/php/extensions/xdebug.so"
+      },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": {
+        "url": "https://github.com/xdebug/xdebug/archive/refs/tags/3.5.3.tar.gz",
+        "sha256": "954e56021668121ecc50b92d2ad1ce945f22ecf81ffc5bb5835219485b12ef5f",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [
+        "php-8.2"
+      ],
+      "build": {
+        "buildSystem": "phpize/configure/make",
+        "flags": [],
+        "environment": {},
+        "dependencies": [
+          "php-8.2"
+        ],
+        "patchSources": []
+      }
+    },
+    {
+      "id": "xdebug-php83",
+      "kind": "php-extension",
+      "version": "3.5.3",
+      "packRevision": 1,
+      "abi": "20230831-nts",
+      "architecture": "arm64",
+      "minimumMacOS": "15.0",
+      "entryPoints": {
+        "extension": "lib/php/extensions/xdebug.so"
+      },
+      "extensions": [],
+      "hashes": {},
+      "license": "Xdebug-1.03",
+      "source": {
+        "url": "https://github.com/xdebug/xdebug/archive/refs/tags/3.5.3.tar.gz",
+        "sha256": "954e56021668121ecc50b92d2ad1ce945f22ecf81ffc5bb5835219485b12ef5f",
+        "patches": []
+      },
+      "supportState": "supported",
+      "dependencyPaths": [
+        "php-8.3"
+      ],
+      "build": {
+        "buildSystem": "phpize/configure/make",
+        "flags": [],
+        "environment": {},
+        "dependencies": [
+          "php-8.3"
         ],
         "patchSources": []
       }

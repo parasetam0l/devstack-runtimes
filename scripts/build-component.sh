@@ -120,7 +120,7 @@ case "$runtime_id" in
         find "$dependencies/lib" -maxdepth 1 \( -name 'libpng*.dylib' -o -name 'libjpeg*.dylib' -o -name 'libz.*.dylib' \
             -o -name 'libwebp*.dylib' -o -name 'libsharpyuv*.dylib' -o -name 'libfreetype*.dylib' -o -name 'libzip*.dylib' \) \
             -exec cp -R {} "$prefix/lib/" \;
-        for php_id in php-7.4 php-8.4 php-8.5; do
+        for php_id in php-7.4 php-8.0 php-8.1 php-8.2 php-8.3 php-8.4 php-8.5; do
             if [[ -d "$output_root/$php_id/lib" ]]; then
                 find "$prefix/lib" -maxdepth 1 -name '*.dylib' -exec cp -R {} "$output_root/$php_id/lib/" \;
             fi
@@ -143,7 +143,7 @@ case "$runtime_id" in
         find "$dependencies/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         find "$openssl_prefix/lib" -name '*.dylib' -maxdepth 2 -exec cp -R {} "$prefix/lib/" \;
         ;;
-    php-7.4|php-8.4|php-8.5)
+    php-7.4|php-8.0|php-8.1|php-8.2|php-8.3|php-8.4|php-8.5)
         openssl_prefix="$output_root/openssl-3.5"
         dependencies="$dependency_root/$runtime_id"
         [[ -d "$dependencies/lib/pkgconfig" ]] || {
@@ -154,14 +154,23 @@ case "$runtime_id" in
         export PKG_CONFIG_PATH="$dependencies/lib/pkgconfig:$openssl_prefix/lib/pkgconfig"
         export CPPFLAGS="-I$dependencies/include -I$openssl_prefix/include"
         export LDFLAGS="-L$dependencies/lib -L$openssl_prefix/lib -lresolv -Wl,-rpath,$dependencies/lib -Wl,-rpath,$openssl_prefix/lib -Wl,-rpath,@loader_path/../lib"
-        if [[ "$runtime_id" == "php-7.4" ]]; then
-            # Modern clang turns PHP 7.4's UB GD build test into a trap at -O2;
-            # build the legacy runtime at -O1 so the configure run test passes.
-            # ICU 78 headers need C++17, while intl's config pins -std=c++11;
-            # our CXXFLAGS come later on the compile line and override it.
-            export CFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
-            export CXXFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types -std=gnu++17"
-        fi
+        case "$runtime_id" in
+            php-7.4)
+                # Modern clang turns PHP 7.4's UB GD build test into a trap at
+                # -O2; build the legacy runtime at -O1 so the configure run
+                # test passes. ICU 78 headers need C++17, while intl's config
+                # pins -std=c++11; our CXXFLAGS override it.
+                export CFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types"
+                export CXXFLAGS="-arch arm64 -O1 -Wno-incompatible-function-pointer-types -std=gnu++17"
+                ;;
+            php-8.0|php-8.1|php-8.2|php-8.3)
+                # Newer clang rejects the implicit function pointer conversions
+                # these releases contain, and their intl configure pins C++11
+                # while ICU 78 headers need C++17.
+                export CFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types"
+                export CXXFLAGS="-arch arm64 -O2 -Wno-incompatible-function-pointer-types -std=gnu++17"
+                ;;
+        esac
         configure_make_install \
             --prefix="$prefix" --disable-cgi --enable-fpm --enable-bcmath --enable-calendar --enable-opcache \
             --enable-exif --enable-ftp --enable-intl --enable-mbstring --enable-pcntl \
@@ -335,15 +344,27 @@ case "$runtime_id" in
         chmod 0755 "$wrapper"
         ;;
     xdebug-php74) build_php_extension php-7.4 xdebug ;;
+    xdebug-php80) build_php_extension php-8.0 xdebug ;;
+    xdebug-php81) build_php_extension php-8.1 xdebug ;;
+    xdebug-php82) build_php_extension php-8.2 xdebug ;;
+    xdebug-php83) build_php_extension php-8.3 xdebug ;;
     xdebug-php84) build_php_extension php-8.4 xdebug ;;
     xdebug-php85) build_php_extension php-8.5 xdebug ;;
     redis-php)
         build_php_extension php-7.4 redis
+        build_php_extension php-8.0 redis
+        build_php_extension php-8.1 redis
+        build_php_extension php-8.2 redis
+        build_php_extension php-8.3 redis
         build_php_extension php-8.4 redis
         build_php_extension php-8.5 redis
         ;;
     imagick-php)
         build_php_extension php-7.4 imagick
+        build_php_extension php-8.0 imagick
+        build_php_extension php-8.1 imagick
+        build_php_extension php-8.2 imagick
+        build_php_extension php-8.3 imagick
         build_php_extension php-8.4 imagick
         build_php_extension php-8.5 imagick
         ;;

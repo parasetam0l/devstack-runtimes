@@ -15,8 +15,8 @@ export LDFLAGS="-L$pg_prefix/lib -Wl,-rpath,$pg_prefix/lib -Wl,-headerpad_max_in
 export PKG_CONFIG_PATH="$pg_prefix/lib/pkgconfig"
 export PGSQL_CFLAGS="-I$pg_prefix/include"
 export PGSQL_LIBS="-L$pg_prefix/lib -lpq"
-# The PHP runtimes to build drivers for; both modern ones by default.
-php_ids=(php-8.4 php-8.5)
+# The PHP runtimes to build drivers for; every supported one by default.
+php_ids=(php-8.0 php-8.1 php-8.2 php-8.3 php-8.4 php-8.5)
 [[ $# -eq 0 ]] || php_ids=("$@")
 for php_id in "${php_ids[@]}"; do
     php_prefix="$output_root/$php_id"

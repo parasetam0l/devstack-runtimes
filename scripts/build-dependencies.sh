@@ -206,7 +206,7 @@ requested="${1:-all}"
 if [[ "$requested" == "all" || "$requested" == "apache" ]]; then build_target apache "$dependency_root/apache-2.4"; fi
 if [[ "$requested" == "all" || "$requested" == "php" ]]; then
     build_target php "$dependency_root/php-8.5"
-    for php_target in php-7.4 php-8.4; do
+    for php_target in php-7.4 php-8.0 php-8.1 php-8.2 php-8.3 php-8.4; do
         # Replace the copy: copying onto an existing tree would nest php-8.5
         # inside it and leave the previous build's files in place.
         rm -rf "$dependency_root/$php_target"

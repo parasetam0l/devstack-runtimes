@@ -26,6 +26,10 @@ DEPENDENCY_TREES = {
     "imagemagick-7.1": ["php"],
     "postgresql-18": ["php"],
     "php-7.4": ["php"],
+    "php-8.0": ["php"],
+    "php-8.1": ["php"],
+    "php-8.2": ["php"],
+    "php-8.3": ["php"],
     "php-8.4": ["php"],
     "php-8.5": ["php"],
     "mysql-8.4": ["mysql"],
@@ -34,11 +38,15 @@ DEPENDENCY_TREES = {
 # link libpq for their PostgreSQL drivers, and Adminer is syntax-checked
 # with PHP 8.5 while it is built.
 BUILD_ONLY_INPUTS = {
+    "php-8.0": ["postgresql-18"],
+    "php-8.1": ["postgresql-18"],
+    "php-8.2": ["postgresql-18"],
+    "php-8.3": ["postgresql-18"],
     "php-8.4": ["postgresql-18"],
     "php-8.5": ["postgresql-18"],
     "adminer-6.2.0": ["php-8.5"],
 }
-POSTGRESQL_DRIVERS = {"php-8.4", "php-8.5"}
+POSTGRESQL_DRIVERS = {"php-8.0", "php-8.1", "php-8.2", "php-8.3", "php-8.4", "php-8.5"}
 
 
 def main():
