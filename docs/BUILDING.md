@@ -30,7 +30,7 @@ A release runs all applicable upstream test suites, the two feasibility gates, r
 
 ## Current development build and safe verification
 
-The default payload includes Apache, Nginx (disabled by default), PHP 8.0–8.5, MySQL 8.4, PostgreSQL 18.6, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
+The default payload includes Apache, Nginx (disabled by default), PHP 8.0–8.5, MySQL 8.4, PostgreSQL 18.7, OpenSSL, Mailpit, phpMyAdmin, Adminer, Composer and ImageMagick. ABI-specific Xdebug, Redis and Imagick modules live inside each PHP runtime. PHP 7.4 and MySQL 5.7 are currently omitted because their gates did not pass.
 
 Packaging success is not full upstream acceptance: the release pipeline signs, notarizes and staples the image, while upstream suites and clean-machine acceptance remain separate work. Keep the packaging log as evidence; `.build/logs/package-latest.log` records the last run.
 

@@ -11,15 +11,15 @@ Built runtimes are published here as signed, notarized runtime packs that DevSta
 | ID | Software | Version | Licence | Note |
 | --- | --- | --- | --- | --- |
 | `openssl-3.5` | OpenSSL | 3.5.9 | Apache-2.0 |  |
-| `apache-2.4` | Apache HTTP Server | 2.4.69 | Apache-2.0 |  |
+| `apache-2.4` | Apache HTTP Server | 2.4.71 | Apache-2.0 |  |
 | `php-7.4` | PHP | 7.4.33 | PHP-3.01 | legacy, optional |
 | `php-8.5` | PHP | 8.5.12 | PHP-3.01 |  |
 | `mysql-5.7` | MySQL | 5.7.44 | GPL-2.0-only WITH Universal-FOSS-exception-1.0 | legacy, optional |
 | `mysql-8.4` | MySQL | 8.4.13 | GPL-2.0-only WITH Universal-FOSS-exception-1.0 |  |
 | `phpmyadmin-5.2.3` | phpMyAdmin | 5.2.3 | GPL-2.0-only |  |
-| `mailpit-1.32.0` | Mailpit | 1.32.0 | MIT |  |
-| `composer-2.10.3` | Composer | 2.10.3 | MIT |  |
-| `imagemagick-7.1` | ImageMagick | 7.1.2-34 | ImageMagick |  |
+| `mailpit-1.34.0` | Mailpit | 1.34.0 | MIT |  |
+| `composer-2.11.2` | Composer | 2.11.2 | MIT |  |
+| `imagemagick-7.1` | ImageMagick | 7.1.2-36 | ImageMagick |  |
 | `xdebug-php74` | Xdebug (PHP extension) | 3.1.6 | Xdebug-1.03 | legacy, optional |
 | `xdebug-php85` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 |  |
 | `redis-php` | Redis (PHP extension) | 6.3.0 | PHP-3.01 |  |
@@ -35,8 +35,8 @@ Built runtimes are published here as signed, notarized runtime packs that DevSta
 | `xdebug-php81` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | end-of-life, optional |
 | `xdebug-php80` | Xdebug (PHP extension) | 3.5.3 | Xdebug-1.03 | end-of-life, optional |
 | `nginx-1.30` | Nginx | 1.30.6 | BSD-2-Clause |  |
-| `adminer-6.2.0` | Adminer | 6.2.0 | Apache-2.0 OR GPL-2.0-only |  |
-| `postgresql-18` | PostgreSQL | 18.6 | PostgreSQL |  |
+| `adminer-6.3.0` | Adminer | 6.3.0 | Apache-2.0 OR GPL-2.0-only |  |
+| `postgresql-18` | PostgreSQL | 18.7 | PostgreSQL |  |
 
 The exact source URL and SHA-256 of each one is in [`locks/runtime-lock.json`](locks/runtime-lock.json); the libraries they link against are in [`locks/dependency-lock.json`](locks/dependency-lock.json).
 

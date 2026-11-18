@@ -36,10 +36,10 @@ on:
           - nginx-1.30
           - mysql-8.4
           - mysql-5.7
-          - mailpit-1.32.0
+          - mailpit-1.34.0
           - phpmyadmin-5.2.3
-          - adminer-6.2.0
-          - composer-2.10.3
+          - adminer-6.3.0
+          - composer-2.11.2
       publish:
         description: Sign, notarize and publish the release
         required: true

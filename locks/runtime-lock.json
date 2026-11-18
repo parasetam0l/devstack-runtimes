@@ -42,7 +42,7 @@
     {
       "id": "apache-2.4",
       "kind": "apache",
-      "version": "2.4.69",
+      "version": "2.4.71",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -54,8 +54,8 @@
       "hashes": {},
       "license": "Apache-2.0",
       "source": {
-        "url": "https://archive.apache.org/dist/httpd/httpd-2.4.69.tar.bz2",
-        "sha256": "c5e6ebc66e349b87d7fc6916ae7cc2a808ed348003de134cf9e9d89d3e2cc73d",
+        "url": "https://archive.apache.org/dist/httpd/httpd-2.4.71.tar.bz2",
+        "sha256": "2bc5da5a33c247341de082717d4ebcb5cb49e8b73a05b7fddf7d5d6dc2f8de62",
         "patches": []
       },
       "supportState": "supported",
@@ -93,7 +93,7 @@
       "id": "php-7.4",
       "kind": "php",
       "version": "7.4.33",
-      "packRevision": 2,
+      "packRevision": 3,
       "abi": "20190902-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -336,7 +336,7 @@
       "id": "php-8.5",
       "kind": "php",
       "version": "8.5.12",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20250925-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -698,9 +698,9 @@
       }
     },
     {
-      "id": "mailpit-1.32.0",
+      "id": "mailpit-1.34.0",
       "kind": "mailpit",
-      "version": "1.32.0",
+      "version": "1.34.0",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -711,8 +711,8 @@
       "hashes": {},
       "license": "MIT",
       "source": {
-        "url": "https://github.com/axllent/mailpit/releases/download/v1.32.0/mailpit-darwin-arm64.tar.gz",
-        "sha256": "23709bd727f20da2290de6a2a40c4685c48a3127586d77370efd1a3a595f9ef6",
+        "url": "https://github.com/axllent/mailpit/releases/download/v1.34.0/mailpit-darwin-arm64.tar.gz",
+        "sha256": "32933e0bd17e9738f19ab2eb5ec4d50e183448c9f29ba97e762d418a0f72e854",
         "patches": []
       },
       "supportState": "supported",
@@ -726,9 +726,9 @@
       }
     },
     {
-      "id": "composer-2.10.3",
+      "id": "composer-2.11.2",
       "kind": "composer",
-      "version": "2.10.3",
+      "version": "2.11.2",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -740,8 +740,8 @@
       "hashes": {},
       "license": "MIT",
       "source": {
-        "url": "https://getcomposer.org/download/2.10.3/composer.phar",
-        "sha256": "7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6",
+        "url": "https://getcomposer.org/download/2.11.2/composer.phar",
+        "sha256": "dd158c0afd41d15fac89e1b4e47b5d42911fe316c3687cd5edac98319b25d028",
         "patches": []
       },
       "supportState": "supported",
@@ -763,7 +763,7 @@
     {
       "id": "imagemagick-7.1",
       "kind": "library",
-      "version": "7.1.2-34",
+      "version": "7.1.2-36",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -774,8 +774,8 @@
       "hashes": {},
       "license": "ImageMagick",
       "source": {
-        "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-34/ImageMagick-7.1.2-34.tar.xz",
-        "sha256": "55fe0ec246245b46c429f9e6bc65294ad4a78a66b88abd9817971ca157856323",
+        "url": "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-36/ImageMagick-7.1.2-36.tar.xz",
+        "sha256": "410cab5ed416329290e77cbd7833a76502671ea25a42d1cfe010f9067b27c2d6",
         "patches": [
           "scripts/prepare-imagemagick.py"
         ]
@@ -957,7 +957,7 @@
       "id": "php-8.4",
       "kind": "php",
       "version": "8.4.27",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20240924-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1201,7 +1201,7 @@
       "id": "php-8.0",
       "kind": "php",
       "version": "8.0.30",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20200930-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1459,7 +1459,7 @@
       "id": "php-8.1",
       "kind": "php",
       "version": "8.1.34",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20210902-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1703,7 +1703,7 @@
       "id": "php-8.2",
       "kind": "php",
       "version": "8.2.35",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20220829-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -1947,7 +1947,7 @@
       "id": "php-8.3",
       "kind": "php",
       "version": "8.3.36",
-      "packRevision": 1,
+      "packRevision": 2,
       "abi": "20230831-nts",
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -2392,9 +2392,9 @@
       }
     },
     {
-      "id": "adminer-6.2.0",
+      "id": "adminer-6.3.0",
       "kind": "adminer",
-      "version": "6.2.0",
+      "version": "6.3.0",
       "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
@@ -2405,8 +2405,8 @@
       "hashes": {},
       "license": "Apache-2.0 OR GPL-2.0-only",
       "source": {
-        "url": "https://github.com/vrana/adminer/releases/download/v6.2.0/adminer-6.2.0-en.php",
-        "sha256": "a1f521b93070bc3298f3a137786c4520496adfad536f312e80a898247e3bf3ae",
+        "url": "https://github.com/vrana/adminer/releases/download/v6.3.0/adminer-6.3.0-en.php",
+        "sha256": "f467aac2419f3992e4bf450f8d88ee9d6ddd45243eb72fa224747019da33a8fa",
         "patches": []
       },
       "supportState": "supported",
@@ -2426,8 +2426,8 @@
     {
       "id": "postgresql-18",
       "kind": "postgresql",
-      "version": "18.6",
-      "packRevision": 3,
+      "version": "18.7",
+      "packRevision": 1,
       "architecture": "arm64",
       "minimumMacOS": "15.0",
       "entryPoints": {
@@ -2443,8 +2443,8 @@
       "hashes": {},
       "license": "PostgreSQL",
       "source": {
-        "url": "https://ftp.postgresql.org/pub/source/v18.6/postgresql-18.6.tar.bz2",
-        "sha256": "555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f",
+        "url": "https://ftp.postgresql.org/pub/source/v18.7/postgresql-18.7.tar.bz2",
+        "sha256": "441dfae4280cae3e0425e5f876f80559fb0731c140f1aae22b3e5a54d0411bfd",
         "patches": []
       },
       "supportState": "supported",

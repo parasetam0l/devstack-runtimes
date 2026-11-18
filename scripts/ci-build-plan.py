@@ -44,7 +44,7 @@ BUILD_ONLY_INPUTS = {
     "php-8.3": ["postgresql-18"],
     "php-8.4": ["postgresql-18"],
     "php-8.5": ["postgresql-18"],
-    "adminer-6.2.0": ["php-8.5"],
+    "adminer-6.3.0": ["php-8.5"],
 }
 POSTGRESQL_DRIVERS = {"php-8.0", "php-8.1", "php-8.2", "php-8.3", "php-8.4", "php-8.5"}
 
