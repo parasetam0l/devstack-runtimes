@@ -66,9 +66,12 @@ shell history. Delete the exported `DeveloperID.p12` afterwards.
    secrets: it builds, runs the upstream test suites, audits, and packs with
    a throwaway key. The pack is attached to the run as an artifact.
 2. Run it again with **Publish** on. It signs, packs with the DevStack
-   runtime key, notarizes and publishes the release.
+   runtime key, notarizes and publishes the release, then publishes the
+   runtime catalog (below), so installed copies of DevStack can offer it.
 3. In DevStack, pin the new pack (`scripts/pin-runtime.sh` in the app
-   repository) and release the app.
+   repository) and release the app. A new runtime needs this before any app
+   can install it; for a newer version or revision of a runtime the app
+   already knows, it only updates what new installs start with.
 
 A runtime's inputs must already be published, because the workflow installs
 them instead of rebuilding them:
@@ -92,6 +95,37 @@ PHP 7.4 and MySQL 5.7 publish only when their feasibility gate passes.
   workflow refuses to overwrite one.
 
 Then build the pack as above.
+
+## The runtime catalog
+
+Installed copies of DevStack learn about newer packs from a signed catalog,
+without an app release. It is the asset `runtime-catalog.json` of the
+`runtime-catalog` release, a prerelease that is never marked latest:
+
+    https://github.com/parasetam0l/devstack-runtimes/releases/download/runtime-catalog/runtime-catalog.json
+
+- **What it lists:** for each runtime ID, the newest published pack (highest
+  version, then `packRevision`), as the same entry `scripts/pin-runtime.sh`
+  in DevStack writes. `scripts/build-runtime-catalog.py` builds it from the
+  releases; drafts and prereleases are left out, and a pack counts only when
+  its release has the pack file with the size and SHA-256 its `pack.json`
+  states. `sequence` is the Unix time of the publish and only grows.
+- **How it is signed:** the catalog JSON is the envelope's `payload`
+  (base64), signed with the same `RUNTIME_PACK_SIGNING_KEY` and key ID as
+  the packs by `DevStackRuntimePackager sign-catalog`, then checked with
+  `verify-catalog` against DevStack's trusted keys before it is uploaded.
+- **When it is published:** the **Publish runtime catalog** workflow runs as
+  the last job of every published **Build runtime** run, and can be started
+  by hand (Actions → Publish runtime catalog → Run workflow), for example
+  after deleting a broken release. It publishes nothing when the packs are
+  unchanged, and refuses a sequence that is not greater than the published
+  one.
+- **How DevStack uses it:** on "Check for Runtime Updates", and at most once
+  a day at launch, it downloads the catalog, checks the signature and that
+  the sequence never goes down, and offers a pack in place of its bundled pin
+  when it is newer and fits the Mac and app version. Runtimes the app doesn't
+  know are ignored: a new runtime still needs `scripts/pin-runtime.sh` and an
+  app release. Each pack is still verified as before it installs.
 
 ## Building on a Mac instead
 

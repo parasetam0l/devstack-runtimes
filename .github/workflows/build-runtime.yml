@@ -331,3 +331,14 @@ jobs:
         run: |
           [[ -n "${KEYCHAIN:-}" ]] && security delete-keychain "$KEYCHAIN" || true
           rm -f "$RUNNER_TEMP/pack.key"
+
+  # A published pack goes into the signed runtime catalog right away, so
+  # DevStack can offer it without an app release (publish-catalog.yml).
+  catalog:
+    needs: build
+    if: inputs.publish
+    permissions:
+      contents: write
+    uses: ./.github/workflows/publish-catalog.yml
+    secrets:
+      RUNTIME_PACK_SIGNING_KEY: ${{ secrets.RUNTIME_PACK_SIGNING_KEY }}

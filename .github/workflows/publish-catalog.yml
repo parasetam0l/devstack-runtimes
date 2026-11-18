@@ -1,0 +1,153 @@
+# Publishes the signed runtime catalog: for each runtime, the newest published
+# pack, signed with the DevStack runtime key. DevStack downloads it from the
+# runtime-catalog release to offer newer pack revisions without an app
+# release (docs/RELEASING.md).
+#
+# It runs after every published Build runtime run (as that run's last job),
+# and by hand: Actions → Publish runtime catalog → Run workflow. When the
+# packs are the same as in the published catalog it publishes nothing.
+name: Publish runtime catalog
+
+on:
+  workflow_dispatch:
+    inputs:
+      devstack-ref:
+        description: DevStack commit or tag whose packager signs the catalog
+        required: true
+        type: string
+        default: main
+  workflow_call:
+    inputs:
+      devstack-ref:
+        required: false
+        type: string
+        default: main
+    secrets:
+      RUNTIME_PACK_SIGNING_KEY:
+        required: true
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  publish:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    # One publish at a time, so sequence only grows.
+    concurrency:
+      group: runtime-catalog
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PACK_KEY_ID: devstack-release-1
+      TAG: runtime-catalog
+    steps:
+      - name: Check the secret
+        env:
+          RUNTIME_PACK_SIGNING_KEY: ${{ secrets.RUNTIME_PACK_SIGNING_KEY }}
+        run: |
+          if [[ -z "$RUNTIME_PACK_SIGNING_KEY" ]]; then
+            echo "::error::Missing repository secret: RUNTIME_PACK_SIGNING_KEY (see docs/RELEASING.md)."
+            exit 1
+          fi
+          echo "WORK=$RUNNER_TEMP/catalog" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The catalog format, the signer and the trusted keys come from DevStack
+      # itself, so the catalog is checked here exactly as the app will check it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: parasetam0l/devstack
+          ref: ${{ inputs.devstack-ref }}
+          path: devstack-app
+
+      - name: Build DevStack's packager
+        run: |
+          swift build -c release --product DevStackRuntimePackager --package-path devstack-app
+          echo "PACKAGER=$(swift build -c release --show-bin-path --package-path devstack-app)/DevStackRuntimePackager" >> "$GITHUB_ENV"
+          echo "TRUSTED_KEYS=$PWD/devstack-app/Sources/DevStackApp/Resources/trusted-runtime-keys.json" >> "$GITHUB_ENV"
+
+      - name: Build the catalog
+        id: catalog
+        run: |
+          mkdir -p "$WORK/published"
+          scripts/build-runtime-catalog.py --repository "$GITHUB_REPOSITORY" --output "$WORK/payload.json"
+          published=()
+          if release="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" 2>"$WORK/error")"; then
+            echo "release_exists=true" >> "$GITHUB_OUTPUT"
+            if jq -e '.assets[] | select(.name == "runtime-catalog.json")' <<< "$release" >/dev/null; then
+              gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern runtime-catalog.json --dir "$WORK/published"
+              published=("$WORK/published/runtime-catalog.json")
+            fi
+          elif grep -q 'HTTP 404' "$WORK/error"; then
+            echo "release_exists=false" >> "$GITHUB_OUTPUT"
+          else
+            cat "$WORK/error" >&2
+            exit 1
+          fi
+          # The published catalog is ours: its sequence and packs are read
+          # without checking the signature, so a key rotation can't block this.
+          python3 - "$WORK/payload.json" "${published[@]}" >> "$GITHUB_OUTPUT" <<'PY'
+          import base64, json, sys
+          new = json.load(open(sys.argv[1]))
+          old = json.loads(base64.b64decode(json.load(open(sys.argv[2]))["payload"])) if len(sys.argv) > 2 else None
+          print(f"published_sequence={old['sequence'] if old else 0}")
+          print(f"changed={'false' if old and old['packs'] == new['packs'] else 'true'}")
+          PY
+          cat "$WORK/payload.json"
+
+      - name: Sign and check the catalog
+        if: steps.catalog.outputs.changed == 'true'
+        env:
+          RUNTIME_PACK_SIGNING_KEY: ${{ secrets.RUNTIME_PACK_SIGNING_KEY }}
+          PUBLISHED_SEQUENCE: ${{ steps.catalog.outputs.published_sequence }}
+        run: |
+          printf '%s' "$RUNTIME_PACK_SIGNING_KEY" | base64 --decode > "$RUNNER_TEMP/catalog.key"
+          "$PACKAGER" sign-catalog "$WORK/payload.json" "$RUNNER_TEMP/catalog.key" "$PACK_KEY_ID" "$WORK/runtime-catalog.json"
+          rm -f "$RUNNER_TEMP/catalog.key"
+          # The check DevStack runs before accepting a catalog.
+          "$PACKAGER" verify-catalog "$WORK/runtime-catalog.json" "$TRUSTED_KEYS"
+          # DevStack refuses a catalog whose sequence doesn't grow.
+          python3 - "$WORK/runtime-catalog.json" "$WORK/payload.json" "$PUBLISHED_SEQUENCE" <<'PY'
+          import base64, json, sys
+          payload = base64.b64decode(json.load(open(sys.argv[1]))["payload"])
+          if payload != open(sys.argv[2], "rb").read():
+              raise SystemExit("The envelope does not carry the catalog that was built.")
+          sequence, published = json.loads(payload)["sequence"], int(sys.argv[3])
+          if sequence <= published:
+              raise SystemExit(f"Sequence {sequence} is not greater than the published {published}: not publishing.")
+          PY
+
+      - name: Publish the catalog
+        if: steps.catalog.outputs.changed == 'true'
+        run: |
+          if [[ "${{ steps.catalog.outputs.release_exists }}" != "true" ]]; then
+            # A prerelease that is never "latest", so it doesn't hide the packs.
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --target "${{ github.event.repository.default_branch }}" \
+              --prerelease --latest=false \
+              --title "Runtime catalog" \
+              --notes "The signed list of the newest runtime packs. DevStack downloads runtime-catalog.json to offer pack updates; it is replaced on each publish."
+          fi
+          gh release upload "$TAG" "$WORK/runtime-catalog.json" --repo "$GITHUB_REPOSITORY" --clobber
+          python3 - "$WORK/payload.json" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          catalog = json.load(open(sys.argv[1]))
+          print(f"Published runtime catalog {catalog['sequence']}:")
+          for pack in catalog["packs"]:
+              print(f"- {pack['name']}")
+          PY
+
+      - name: Report an unchanged catalog
+        if: steps.catalog.outputs.changed == 'false'
+        run: |
+          echo "The published runtime catalog already lists the newest packs: nothing to publish." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/catalog.key"
